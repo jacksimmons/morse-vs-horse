@@ -45,7 +45,9 @@ public class PonyPathing : MonoBehaviour
     }
     private float m_timerTotal;
 
+    private Image m_image;
 
+    
     private void Start()
     {
         // Calculate total path length (and number of edges in path)
@@ -75,9 +77,10 @@ public class PonyPathing : MonoBehaviour
         SetEdge(0);
 
 
-
         // Init GameBehaviour
         m_gb = GameObject.FindWithTag("GameController").GetComponent<GameBehaviour>();
+
+        m_image = GetComponent<Image>();
     }
 
 
@@ -94,8 +97,10 @@ public class PonyPathing : MonoBehaviour
                 SetEdge(m_currentEdgeIndex + 1);
             // Else the entire path has been completed, and the player loses a life.
             else
+            {
                 m_gb.LoseLife();
-
+                Explode();
+            }
         }
         else
         {
@@ -105,6 +110,10 @@ public class PonyPathing : MonoBehaviour
             // Move the pony along the edge
             transform.position = Vector2.Lerp(m_currentEdge.Start, m_currentEdge.End, t);
         }
+
+
+        // Enable the pony image once it has been moved to its starting point
+        m_image.enabled = true;
     }
 
 
@@ -127,5 +136,11 @@ public class PonyPathing : MonoBehaviour
             transform.localScale = new Vector3(-prevXScaleSize, prevScale.y, prevScale.z);
         else
             transform.localScale = new Vector3(prevXScaleSize, prevScale.y, prevScale.z);
+    }
+
+
+    private void Explode()
+    {
+        Destroy(gameObject);
     }
 }

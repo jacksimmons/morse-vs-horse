@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public enum Level
@@ -27,8 +28,16 @@ public class GameBehaviour : MonoBehaviour
     public Level CurrentLevel { get; private set; }
 
     [SerializeField]
-    private TMP_Text m_livesText;
-    private int m_lives;
+    private Image m_livesImage;
+
+    /// <summary>
+    /// Array of sprites, 0th represents 0 lives lost, and so on.
+    /// Game over occurs when a life is lost and the final sprite is
+    /// displayed.
+    /// </summary>
+    [SerializeField]
+    private Sprite[] m_livesLostSprites;
+    private int m_livesLost = 0;
 
     [SerializeField]
     private GameObject m_gameOverPanel;
@@ -39,28 +48,30 @@ public class GameBehaviour : MonoBehaviour
 
     private void Start()
     {
-        m_lives = 1;
-        UpdateLivesText();
+        m_livesImage.sprite = m_livesLostSprites[0];
+        
+        QueuePonySpawn(1, PonyDiff.Easy);
+        QueuePonySpawn(2, PonyDiff.Easy);
+        QueuePonySpawn(3, PonyDiff.Easy);
+        //QueuePonySpawn(40, PonyDiff.Easy);
 
-        QueuePonySpawn(5, PonyDiff.Easy);
-        QueuePonySpawn(10, PonyDiff.Hard);
+        //QueuePonySpawn(50, PonyDiff.Hard);
+        //QueuePonySpawn(70, PonyDiff.Hard);
+        //QueuePonySpawn(90, PonyDiff.Hard);
     }
 
 
     public void LoseLife()
     {
-        m_lives--;
-        UpdateLivesText();
-        if (m_lives == 0)
-        {
+        m_livesLost++;
+
+        // Go to next life lost sprite.
+        if (m_livesLost < m_livesLostSprites.Length)
+            m_livesImage.sprite = m_livesLostSprites[m_livesLost];
+
+        // All lives lost sprites seen, and another life lost => death.
+        else
             m_gameOverPanel.SetActive(true);
-        }
-    }
-
-
-    private void UpdateLivesText()
-    {
-        m_livesText.text = $"Lives: {m_lives}";
     }
 
 
@@ -73,7 +84,10 @@ public class GameBehaviour : MonoBehaviour
         {
             // Handle the error checking inside the coroutine, in case of race conditions.
             if (m_earls.Count == 0)
+            {
                 Debug.LogError("No earls remaining!");
+                return;
+            }
 
             EarlBehaviour earl = m_earls[Random.Range(0, m_earls.Count)];
             earl.ActivatePony(diff);
