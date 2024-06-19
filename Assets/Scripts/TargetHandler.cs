@@ -51,6 +51,7 @@ public class TargetHandler : MonoBehaviour
             Debug.LogError("Target pony was null!");
         }
 
+        m_targetPony.Explode();
         m_targetPony = null;
         m_targetText.text = "";
     }

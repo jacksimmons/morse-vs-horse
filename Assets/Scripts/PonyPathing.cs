@@ -40,7 +40,7 @@ public class PonyPathing : MonoBehaviour
     {
         set
         {
-            m_timerTotal = 10 * (1 + (int)value);
+            m_timerTotal = 50 * (1 + (int)value);
         }
     }
     private float m_timerTotal;
@@ -139,7 +139,7 @@ public class PonyPathing : MonoBehaviour
     }
 
 
-    private void Explode()
+    public void Explode()
     {
         Destroy(gameObject);
     }

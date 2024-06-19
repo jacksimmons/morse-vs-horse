@@ -123,7 +123,7 @@ public class InputHandler : MonoBehaviour
                 }
             }
             // Handle word breaks (if char break has already happened, and morse input is not empty)
-            else if (m_timeSinceLastSignal > CHAR_BREAK_LONGER_THAN && m_morseStringInput.Items.Count > 0)
+            else if (m_timeSinceLastSignal > CHAR_BREAK_LONGER_THAN && m_morseCharInput.Sig1 != EMorseSignal.None)
             {
                 m_timeSinceLastSignal += Time.deltaTime;
                 if (m_timeSinceLastSignal > WORD_BREAK_LONGER_THAN)
