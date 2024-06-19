@@ -90,6 +90,7 @@ public class GameBehaviour : MonoBehaviour
             }
 
             EarlBehaviour earl = m_earls[Random.Range(0, m_earls.Count)];
+            // Activate the pony and earl UI.
             earl.ActivatePony(diff);
             m_earls.Remove(earl);
         }));

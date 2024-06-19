@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 
 /// <summary>
@@ -28,6 +29,11 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// completed.
     /// </summary>
     public static MorseString CurrentMorseTarget { get; private set; } = null;
+
+    /// <summary>
+    /// Has the pony begun moving? If so, earl appears on the UI, and can be hovered on.
+    /// </summary>
+    private bool m_ponyActive = false;
 
 
     private void Start()
@@ -59,7 +65,8 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// </summary>
     public void OnPointerEnter(PointerEventData _)
     {
-        m_targetHandler.SetTarget(m_manager.Words[m_index], m_pony);
+        if (m_ponyActive)
+            m_targetHandler.SetTarget(m_manager.Words[m_index], m_pony);
     }
 
 
@@ -69,18 +76,25 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// </summary>
     public void OnPointerExit(PointerEventData _)
     {
-        m_targetHandler.SetTarget(MorseCode.MorseStringToEnglishString(CurrentMorseTarget ?? new()), m_pony);
+        if (m_ponyActive)
+            m_targetHandler.SetTarget(MorseCode.MorseStringToEnglishString(CurrentMorseTarget ?? new()), m_pony);
     }
 
 
     public void OnClicked()
     {
-        CurrentMorseTarget = MorseCode.EnglishStringToMorseString(m_manager.Words[m_index]);
+        if (m_ponyActive)
+            CurrentMorseTarget = MorseCode.EnglishStringToMorseString(m_manager.Words[m_index]);
     }
 
 
     public void ActivatePony(PonyDiff diff)
     {
+        // Display and enable earl button.
+        m_ponyActive = true;
+        GetComponent<Image>().enabled = true;
+        GetComponent<Button>().enabled = true;
+
         if (m_pony.gameObject.activeSelf)
         {
             Debug.LogWarning("Pony is already activated.");
