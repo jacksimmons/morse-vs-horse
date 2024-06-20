@@ -1,29 +1,58 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using UnityEngine;
 
 
 public class EarlManager : MonoBehaviour
 {
-    private List<string> m_words = new();
-    
-    public ReadOnlyCollection<string> Words { get; private set; }
+    private List<string> m_messages = new();
+    public ReadOnlyCollection<string> Messages { get; private set; }
+
     private int m_numEarls = 0;
+
+    private List<string> WordListFilenameToList(string filename)
+    {
+        TextAsset words = Resources.Load<TextAsset>(filename);
+        return new(words.text.Split("\r\n").Except(Messages));
+    }
+
+    /// <summary>
+    /// Difficulty to list of messages of that difficulty.
+    /// All messages originally in the files, including already used messages.
+    /// </summary>
+    private Dictionary<Difficulty, List<string>> s_allMessages;
 
 
     private void Awake()
     {
-        Words = new(m_words);
+        Messages = new(m_messages);
+        s_allMessages = new()
+        {
+            { Difficulty.Easy, WordListFilenameToList("WordsEasy") },
+            { Difficulty.Medium, WordListFilenameToList("WordsMedium") },
+            { Difficulty.Hard, WordListFilenameToList("WordsHard") }
+        };
     }
 
 
     /// <summary>
-    /// Return the next available index (used by EarlBehaviour).
-    /// Provided in exchange for the earl's message.
+    /// Return a list of messages not used by any earls, and of the provided
+    /// difficulty.
     /// </summary>
-    public int GetNextIndex(string word)
+    public List<string> GetUnusedMessagesOfDifficulty(Difficulty difficulty)
     {
-        m_words.Add(word);
+        return new(s_allMessages[difficulty].Except(m_messages));
+    }
+
+
+    /// <summary>
+    /// Adds the provided message, and returns the total number of earl
+    /// messages thus far.
+    /// </summary>
+    public int AddMessage(string message)
+    {
+        m_messages.Add(message);
         return m_numEarls++;
     }
 }

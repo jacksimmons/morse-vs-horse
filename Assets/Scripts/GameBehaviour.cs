@@ -23,6 +23,14 @@ public enum GameDiff
 }
 
 
+public enum Difficulty
+{
+    Easy,
+    Medium,
+    Hard
+}
+
+
 public class GameBehaviour : MonoBehaviour
 {
     public Level CurrentLevel { get; private set; }
@@ -50,14 +58,14 @@ public class GameBehaviour : MonoBehaviour
     {
         m_livesImage.sprite = m_livesLostSprites[0];
         
-        QueuePonySpawn(1, PonyDiff.Easy);
-        QueuePonySpawn(2, PonyDiff.Easy);
-        QueuePonySpawn(3, PonyDiff.Easy);
-        //QueuePonySpawn(40, PonyDiff.Easy);
+        QueuePonySpawn(1, Difficulty.Hard);
+        QueuePonySpawn(2, Difficulty.Hard);
+        QueuePonySpawn(3, Difficulty.Hard);
+        //QueuePonySpawn(40, Difficulty.Easy);
 
-        //QueuePonySpawn(50, PonyDiff.Hard);
-        //QueuePonySpawn(70, PonyDiff.Hard);
-        //QueuePonySpawn(90, PonyDiff.Hard);
+        //QueuePonySpawn(50, Difficulty.Hard);
+        //QueuePonySpawn(70, Difficulty.Hard);
+        //QueuePonySpawn(90, Difficulty.Hard);
     }
 
 
@@ -78,7 +86,7 @@ public class GameBehaviour : MonoBehaviour
     /// <summary>
     /// Queues a random pony spawn in the future (in `seconds` seconds).
     /// </summary>
-    private void QueuePonySpawn(float seconds, PonyDiff diff)
+    private void QueuePonySpawn(float seconds, Difficulty diff)
     {
         StartCoroutine(Wait.WaitThen(seconds, () =>
         {
@@ -91,7 +99,7 @@ public class GameBehaviour : MonoBehaviour
 
             EarlBehaviour earl = m_earls[Random.Range(0, m_earls.Count)];
             // Activate the pony and earl UI.
-            earl.ActivatePony(diff);
+            earl.ActivateEarl(diff);
             m_earls.Remove(earl);
         }));
     }

@@ -11,7 +11,7 @@ public class TargetHandler : MonoBehaviour
     [SerializeField]
     private TMP_Text m_targetHintText;
 
-    private PonyPathing m_targetPony;
+    private PonyBehaviour m_targetPony;
 
 
     private void Start()
@@ -28,7 +28,7 @@ public class TargetHandler : MonoBehaviour
     /// Set the display text of the target morse string, and the pony attempting to deliver
     /// the same message.
     /// </summary>
-    public void SetTarget(string targetTxt, PonyPathing pony)
+    public void SetTarget(string targetTxt, PonyBehaviour pony)
     {
         if (SaveData.Instance.easyMode)
         {
