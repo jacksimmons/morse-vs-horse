@@ -19,16 +19,18 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// </summary>
     private static EarlManager Manager => GameObject.FindWithTag("GameController").GetComponent<EarlManager>();
 
+    public bool EarlActive { get; private set; } = false;
+
     /// <summary>
     /// The pony this earl sends.
     /// </summary>
     [SerializeField]
     private PonyBehaviour m_pony;
+    public PonyBehaviour Pony => m_pony;
 
     /// <summary>
     /// The city this earl guards.
     /// </summary>
-    [SerializeField]
     private CityBehaviour m_city;
 
     /// <summary>
@@ -36,23 +38,36 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// </summary>
     private int m_index;
 
-    /// <summary>
-    /// The target MorseString. When the input equals the target, the message is
-    /// completed.
-    /// </summary>
-    public static MorseString CurrentMorseTarget { get; private set; } = null;
-
-    /// <summary>
-    /// Has the pony begun moving? If so, earl appears on the UI, and can be hovered on.
-    /// </summary>
-    private bool m_ponyActive = false;
-
     private TargetHandler m_targetHandler;
 
 
     private void Start()
     {
         m_targetHandler = GameObject.FindWithTag("GameController").GetComponent<TargetHandler>();
+        m_city = GetComponentInParent<CityBehaviour>();
+    }
+
+
+    private void Update()
+    {
+        // Once the earl has been activated check for:
+
+        // If the pony is inactive, and the current target is this earl's message, need to make
+        // the message disappear.
+
+        // Also the earl must disappear when his pony becomes inactive.
+        if (EarlActive && !Pony.PonyActive)
+        {
+            // Message disappear
+            if (Manager.CurrentMorseTarget == MorseCode.EnglishStringToMorseString(Manager.Messages[m_index]))
+            {
+                Manager.CurrentMorseTarget = null;
+                m_targetHandler.SetTarget("", m_pony);
+            }
+
+            // Earl disappear
+            DeactivateEarl();
+        }
     }
 
 
@@ -61,9 +76,10 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// </summary>
     public void OnPointerEnter(PointerEventData _)
     {
-        if (m_ponyActive)
+        if (Pony.PonyActive)
         {
-            m_targetHandler.SetTarget(Manager.Messages[m_index], m_pony);
+            m_targetHandler.SetTarget(Manager.Messages[m_index], Pony);
+            Pony.SetPathPulse(true);
         }
     }
 
@@ -74,34 +90,36 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// </summary>
     public void OnPointerExit(PointerEventData _)
     {
-        if (m_ponyActive)
+        if (Pony.PonyActive)
         {
-            m_targetHandler.SetTarget(MorseCode.MorseStringToEnglishString(CurrentMorseTarget ?? new()), m_pony);
+            m_targetHandler.SetTarget(MorseCode.MorseStringToEnglishString(Manager.CurrentMorseTarget ?? new()), m_pony);
+            Pony.SetPathPulse(false);
         }
     }
 
 
     public void OnClicked()
     {
-        if (m_ponyActive)
-            CurrentMorseTarget = MorseCode.EnglishStringToMorseString(Manager.Messages[m_index]);
+        if (Pony.PonyActive)
+        {
+            Manager.CurrentMorseTarget = MorseCode.EnglishStringToMorseString(Manager.Messages[m_index]);
+        }
     }
 
 
     public void ActivateEarl(Difficulty diff)
     {
         // Display and enable earl button.
-        m_ponyActive = true;
         GetComponent<Image>().enabled = true;
         GetComponent<Button>().enabled = true;
 
-        if (m_pony.gameObject.activeSelf)
+        if (Pony.gameObject.activeSelf)
         {
             Debug.LogWarning("Pony is already activated.");
         }
 
-        m_pony.gameObject.SetActive(true);
-        m_pony.ActivatePony(diff, m_city, (int)diff + 1);
+        Pony.gameObject.SetActive(true);
+        Pony.ActivatePony(diff, m_city, (int)diff + 1);
 
         // Assign the earl's word based on provided difficulty.
         List<string> messages = Manager.GetUnusedMessagesOfDifficulty(diff);
@@ -119,5 +137,19 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         }
 
         m_index = Manager.AddMessage(message);
+
+        // Set activity flag
+        EarlActive = true;
+    }
+
+
+    private void DeactivateEarl()
+    {
+        // Hide earl button.
+        GetComponent<Image>().enabled = false;
+        GetComponent<Button>().enabled = false;
+
+        // Set activity flag
+        EarlActive = false;
     }
 }

@@ -24,6 +24,7 @@ public class Path
 
     public Path(Vector2[] pts, string[] ptNames, CityBehaviour from, CityBehaviour to)
     {
+
         Points = pts;
         PointNames = ptNames;
         From = from;

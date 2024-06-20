@@ -11,6 +11,13 @@ public class EarlManager : MonoBehaviour
 
     private int m_numEarls = 0;
 
+    /// <summary>
+    /// The target MorseString. When the input equals the target, the message is
+    /// completed.
+    /// </summary>
+    public MorseString CurrentMorseTarget { get; set; } = null;
+
+
     private List<string> WordListFilenameToList(string filename)
     {
         TextAsset words = Resources.Load<TextAsset>(filename);

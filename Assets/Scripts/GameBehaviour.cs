@@ -49,23 +49,59 @@ public class GameBehaviour : MonoBehaviour
 
     [SerializeField]
     private GameObject m_gameOverPanel;
+    [SerializeField]
+    private GameObject m_victoryPanel;
 
     [SerializeField]
-    private List<EarlBehaviour> m_earls;
+    private GameObject m_cities;
+    private List<EarlBehaviour> m_inactiveEarls = new();
+    private List<EarlBehaviour> m_activeEarls = new();
+
+    private bool m_checkNoMessagesLeft = false;
 
 
     private void Start()
     {
         m_livesImage.sprite = m_livesLostSprites[0];
+
+        foreach (Transform city in m_cities.transform)
+        {
+            m_inactiveEarls.Add(city.GetComponentInChildren<EarlBehaviour>());
+        }
         
-        QueuePonySpawn(1, Difficulty.Hard);
-        QueuePonySpawn(2, Difficulty.Hard);
-        QueuePonySpawn(3, Difficulty.Hard);
+        // Easy takes ~20s so spawn every 15s
+        QueuePonySpawn(5, Difficulty.Hard);
         //QueuePonySpawn(40, Difficulty.Easy);
 
         //QueuePonySpawn(50, Difficulty.Hard);
         //QueuePonySpawn(70, Difficulty.Hard);
         //QueuePonySpawn(90, Difficulty.Hard);
+
+        // Activate victory check after all ponies have spawned
+        StartCoroutine(Wait.WaitThen(35, () => m_checkNoMessagesLeft = true));
+    }
+
+
+    private void Update()
+    {
+        // Handle moving active earls to inactive so they can be reused.
+        List<EarlBehaviour> activeEarlsTemp = new(m_activeEarls);
+        foreach (EarlBehaviour earl in activeEarlsTemp)
+        {
+            if (!earl.Pony.PonyActive && !earl.EarlActive)
+            {
+                m_activeEarls.Remove(earl);
+                m_inactiveEarls.Add(earl);
+            }
+        }
+
+        if (m_checkNoMessagesLeft)
+        {
+            if (m_activeEarls.Count == 0)
+            {
+                m_victoryPanel.SetActive(true);
+            }
+        }
     }
 
 
@@ -91,16 +127,20 @@ public class GameBehaviour : MonoBehaviour
         StartCoroutine(Wait.WaitThen(seconds, () =>
         {
             // Handle the error checking inside the coroutine, in case of race conditions.
-            if (m_earls.Count == 0)
+            if (m_inactiveEarls.Count == 0)
             {
                 Debug.LogError("No earls remaining!");
                 return;
             }
 
-            EarlBehaviour earl = m_earls[Random.Range(0, m_earls.Count)];
+            EarlBehaviour earl = m_inactiveEarls[Random.Range(0, m_inactiveEarls.Count)];
+
             // Activate the pony and earl UI.
             earl.ActivateEarl(diff);
-            m_earls.Remove(earl);
+
+            // Move the earl to active earls.
+            m_inactiveEarls.Remove(earl);
+            m_activeEarls.Add(earl);
         }));
     }
 }

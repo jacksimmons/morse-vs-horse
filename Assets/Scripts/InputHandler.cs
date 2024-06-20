@@ -7,7 +7,8 @@ public class InputHandler : MonoBehaviour
 {
     [SerializeField]
     private TMP_Text m_inputText;
-
+    [SerializeField]
+    private EarlManager m_earlManager;
     [SerializeField]
     private TargetHandler m_targetHandler;
 
@@ -122,8 +123,9 @@ public class InputHandler : MonoBehaviour
                     m_morseCharInput = MorseChar.Empty;
                 }
             }
-            // Handle word breaks (if char break has already happened, and morse input is not empty)
-            else if (m_timeSinceLastSignal > CHAR_BREAK_LONGER_THAN && m_morseCharInput.Sig1 != EMorseSignal.None)
+            // Handle word breaks (if char break has already happened, and last char was not a word break)
+            else if (m_timeSinceLastSignal > CHAR_BREAK_LONGER_THAN && m_morseStringInput.Items.Count > 0
+                && !m_morseStringInput.Items[^1].Equals(MorseChar.WordBreak))
             {
                 m_timeSinceLastSignal += Time.deltaTime;
                 if (m_timeSinceLastSignal > WORD_BREAK_LONGER_THAN)
@@ -148,7 +150,9 @@ public class InputHandler : MonoBehaviour
 
     private void CheckMorseInput()
     {
-        if (m_morseStringInput.Equals(EarlBehaviour.CurrentMorseTarget))
+        // Check if the messages match. Messages can be completed only after
+        // waiting for the final character break.
+        if (m_morseStringInput.Equals(m_earlManager.CurrentMorseTarget))
         {
             m_morseStringInput = new();
             m_morseCharInput = new();

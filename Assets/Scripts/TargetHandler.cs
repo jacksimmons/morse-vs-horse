@@ -52,7 +52,6 @@ public class TargetHandler : MonoBehaviour
         }
 
         m_targetPony.Explode();
-        m_targetPony = null;
-        m_targetText.text = "";
+        SetTarget("", null);
     }
 }

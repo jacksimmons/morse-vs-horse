@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -44,7 +46,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         {
             m_origPath = path;
 
-            m_timerTotal = 10 * (1 + (int)diff);
+            m_timerTotal = 45 + (1 + (int)diff) * 10;
             m_pony = pony;
             m_ponyImage = pony.GetComponentInChildren<Image>();
             m_ponyTimer = pony.GetComponentInChildren<TMP_Text>();
@@ -142,10 +144,24 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     private GameBehaviour m_gb;
     private Pony m_pony = null;
 
+    /// <summary>
+    /// Has the pony begun moving?
+    /// </summary>
+    public bool PonyActive { get; private set; } = false;
+
+    private List<PathBehaviour> m_ponyPaths;
+    /// <summary>
+    /// The paths that make up the pony's journey.
+    /// </summary>
+    public ReadOnlyCollection<PathBehaviour> PonyPaths;
+
+    [SerializeField]
+    private EarlBehaviour m_earl;
+
 
     private void Start()
     {
-        // Init GameBehaviour
+        PonyPaths = new(m_ponyPaths);
         m_gb = GameObject.FindWithTag("GameController").GetComponent<GameBehaviour>();
     }
 
@@ -172,18 +188,36 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         // distances (which are handled below and ignored).
         Debug.Assert(cityDist < GameObject.Find("Cities").transform.childCount);
 
-        // Recursively, randomly generate path
-        Path path = RandomlyGeneratePath(cityDist, new List<CityBehaviour> { startCity }, null);
+        // Recursively, randomly generate pony journey.
+        Path journey = RandomlyGeneratePath(cityDist, new List<CityBehaviour> { startCity }, null);
 
-        m_pony = new Pony(diff, this, path);
+        // Calculate which paths are contained entirely by the pony path.
+        m_ponyPaths = new();
+        Transform pathTransforms = GameObject.Find("Paths").transform;
+        foreach (Transform pathTransform in pathTransforms)
+        {
+            PathBehaviour pb = pathTransform.GetComponent<PathBehaviour>();
+            Vector2[] pbPathPts = pb.Points.Select(x => (Vector2)x.transform.position).ToArray();
+
+            // Check path completely contains pb's points.
+            if (journey.Points.Intersect(pbPathPts).Count() == pbPathPts.Length)
+            {
+                m_ponyPaths.Add(pb);
+            }
+        }
+
+        m_pony = new Pony(diff, this, journey);
+        PonyActive = true;
     }
 
 
     /// <summary>
-    /// R
+    /// Recursively, randomly generates a pony path.
     /// </summary>
-    /// <param name="cities">A record of all stored cities, used to peek at the top, and the bottom for the start city.</param>
-    /// <param name="dist"></param>
+    /// <param name="dist">The maximum (goal) number of cities the path will be. May be lower
+    /// if the path reaches a leaf node early. This is fine as the pony will just move slower.
+    /// </param>
+    /// <param name="visited">A record of all visited cities.</param>
     private Path RandomlyGeneratePath(int dist, List<CityBehaviour> visited, Path genPath)
     {
         // Base case.
@@ -214,9 +248,14 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     }
 
 
+    /// <summary>
+    /// Called when the pony is victorious or loses. Pony disappears here,
+    /// and the earl's pony activity status is updated.
+    /// </summary>
     public void Explode()
     {
         Destroy(gameObject);
+        PonyActive = false;
     }
 
 
@@ -233,6 +272,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public void OnPointerEnter(PointerEventData _)
     {
         GetComponentInChildren<TMP_Text>().enabled = true;
+        SetPathPulse(true);
     }
 
 
@@ -242,5 +282,24 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public void OnPointerExit(PointerEventData _)
     {
         GetComponentInChildren<TMP_Text>().enabled = false;
+        SetPathPulse(false);
+    }
+
+
+    public void SetPathPulse(bool pulse)
+    {
+        foreach (PathBehaviour pb in m_ponyPaths)
+        {
+            pb.SetPulsing(pulse);
+        }
+    }
+
+
+    public void SetPathLocked(bool locked)
+    {
+        foreach (PathBehaviour pb in m_ponyPaths)
+        {
+            pb.SetLocked(locked);
+        }
     }
 }
