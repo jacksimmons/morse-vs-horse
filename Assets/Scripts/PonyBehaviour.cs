@@ -197,7 +197,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         foreach (Transform pathTransform in pathTransforms)
         {
             PathBehaviour pb = pathTransform.GetComponent<PathBehaviour>();
-            Vector2[] pbPathPts = pb.Points.Select(x => (Vector2)x.transform.position).ToArray();
+            Vector2[] pbPathPts = pb.Points.ToArray();
 
             // Check path completely contains pb's points.
             if (journey.Points.Intersect(pbPathPts).Count() == pbPathPts.Length)

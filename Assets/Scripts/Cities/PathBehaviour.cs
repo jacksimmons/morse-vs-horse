@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,8 +7,8 @@ using UnityEngine.UI;
 public class PathBehaviour : MonoBehaviour
 {
     [SerializeField]
-    private GameObject[] m_points;
-    public ReadOnlyCollection<GameObject> Points;
+    private GameObject[] m_pointStorage;
+    public Vector2[] Points => m_pointStorage.Select(x => (Vector2)x.transform.position).ToArray();
 
     [SerializeField]
     private Image m_telegraphImage;
@@ -23,7 +24,6 @@ public class PathBehaviour : MonoBehaviour
 
     private void Awake()
     {
-        Points = new(m_points);
         m_telegraphImage.color = m_telegraphPulseMin;
     }
 
