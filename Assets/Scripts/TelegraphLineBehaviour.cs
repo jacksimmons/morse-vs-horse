@@ -1,25 +1,25 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
 
-public class PathBehaviour : MonoBehaviour
+public class TelegraphLineBehaviour : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject[] m_pointStorage;
-    public Vector2[] Points => m_pointStorage.Select(x => (Vector2)x.transform.position).ToArray();
-
     [SerializeField]
     private Image m_telegraphImage;
     private bool m_telegraphPulsing = false;
     private bool m_telegraphLocked = false;
-    private Color m_telegraphPulseMin = Color.black;
-    private Color m_telegraphPulseMax = Color.red;
+    private static readonly Color m_telegraphPulseMin = Color.white;
+    private static readonly Color m_telegraphPulseMax = Color.red;
     private float m_pulseUpElapsed = 0;
     private float m_pulseDownElapsed = 0;
     private bool m_pulseUpElseDown = true;
     private const float PULSE_TIME = 2f;
+    private int m_orderInPath;
 
 
     private void Awake()
@@ -69,14 +69,28 @@ public class PathBehaviour : MonoBehaviour
     }
 
 
+
     public void SetPulsing(bool pulsing)
     {
+        UpdateTelegraphLayer(pulsing);
         m_telegraphPulsing = pulsing;
     }
 
 
     public void SetLocked(bool locked)
     {
+        UpdateTelegraphLayer(locked);
         m_telegraphLocked = locked;
+    }
+
+
+    /// <summary>
+    /// Moves a telegraph image to the front if it is pulsing/locked.
+    /// Whenever a telegraph image is viewed, it is always in front.
+    /// </summary>
+    private void UpdateTelegraphLayer(bool infront)
+    {
+        if (infront)
+            m_telegraphImage.transform.SetAsLastSibling();
     }
 }

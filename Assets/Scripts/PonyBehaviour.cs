@@ -150,10 +150,6 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public bool PonyActive { get; private set; } = false;
 
     private List<PathBehaviour> m_ponyPaths;
-    /// <summary>
-    /// The paths that make up the pony's journey.
-    /// </summary>
-    public ReadOnlyCollection<PathBehaviour> PonyPaths;
 
     [SerializeField]
     private EarlBehaviour m_earl;
@@ -161,17 +157,13 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     private void Start()
     {
-        PonyPaths = new(m_ponyPaths);
         m_gb = GameObject.FindWithTag("GameController").GetComponent<GameBehaviour>();
     }
 
 
     private void Update()
     {
-        if (m_pony != null)
-        {
-            m_pony.Step(Time.deltaTime);
-        }
+        m_pony?.Step(Time.deltaTime);
     }
 
 
@@ -288,18 +280,18 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     public void SetPathPulse(bool pulse)
     {
-        foreach (PathBehaviour pb in m_ponyPaths)
+        for (int i = 0; i < m_ponyPaths.Count; i++)
         {
-            pb.SetPulsing(pulse);
+            m_ponyPaths[i].GetComponent<TelegraphLineBehaviour>().SetPulsing(pulse);
         }
     }
 
 
     public void SetPathLocked(bool locked)
     {
-        foreach (PathBehaviour pb in m_ponyPaths)
+        for (int i = 0; i < m_ponyPaths.Count; i++)
         {
-            pb.SetLocked(locked);
+            m_ponyPaths[i].GetComponent<TelegraphLineBehaviour>().SetLocked(locked);
         }
     }
 }

@@ -70,10 +70,7 @@ public class GameBehaviour : MonoBehaviour
         }
         
         // Easy takes ~20s so spawn every 15s
-        QueuePonySpawn(1, Difficulty.Hard);
-        QueuePonySpawn(2, Difficulty.Hard);
-        QueuePonySpawn(3, Difficulty.Hard);
-        QueuePonySpawn(4, Difficulty.Hard);
+        QueuePonySpawn(1, Difficulty.Easy);
         //QueuePonySpawn(40, Difficulty.Easy);
 
         //QueuePonySpawn(50, Difficulty.Hard);
@@ -81,7 +78,7 @@ public class GameBehaviour : MonoBehaviour
         //QueuePonySpawn(90, Difficulty.Hard);
 
         // Activate victory check after all ponies have spawned
-        StartCoroutine(Wait.WaitThen(35, () => m_checkNoMessagesLeft = true));
+        StartCoroutine(Wait.WaitThen(1, () => m_checkNoMessagesLeft = true));
     }
 
 
