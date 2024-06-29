@@ -16,9 +16,9 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// </summary>
     private struct PathEdge
     {
-        public float ProportionOfTimer;
-        public Vector2 Start;
-        public Vector2 End;
+        public float ProportionOfTimer { get; set; }
+        public Vector2 Start { get; set; }
+        public Vector2 End { get; set; }
     }
 
     private class Pony
@@ -26,9 +26,6 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         private readonly PonyBehaviour m_pony;
         private readonly Image m_ponyImage;
         private readonly TMP_Text m_ponyTimer;
-
-        // !Debug
-        private readonly Path m_origPath;
 
         private PathEdge[] m_path;
         private PathEdge m_currentEdge;
@@ -44,8 +41,6 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
         public Pony(Difficulty diff, PonyBehaviour pony, Path path)
         {
-            m_origPath = path;
-
             m_timerTotal = 45 + (1 + (int)diff) * 10;
             m_pony = pony;
             m_ponyImage = pony.GetComponentInChildren<Image>();
@@ -109,7 +104,8 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
                 m_ponyTimer.text = $"{(m_timerTotal - m_timerElapsed):F2}s";
 
                 // Move the pony along the edge
-                m_pony.transform.position = Vector2.MoveTowards(m_pony.transform.position, m_currentEdge.End, m_speed * dt);
+                RectTransform rt = m_pony.GetComponent<RectTransform>();
+                rt.anchoredPosition = Vector2.MoveTowards(rt.anchoredPosition, m_currentEdge.End, m_speed * dt);
             }
 
             // Enable the pony image once it has been moved to its starting point
@@ -137,7 +133,8 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
                 m_ponyImage.transform.localScale = new Vector3(prevXScaleSize, prevScale.y, prevScale.z);
 
             // Ensure pony position is correct at the start of an edge.
-            m_pony.transform.position = m_currentEdge.Start;
+            print(m_currentEdge.Start);
+            m_pony.GetComponent<RectTransform>().anchoredPosition = m_currentEdge.Start;
         }
     }
 

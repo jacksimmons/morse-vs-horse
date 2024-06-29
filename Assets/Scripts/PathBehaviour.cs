@@ -20,6 +20,8 @@ public class PathBehaviour : MonoBehaviour
         {
             m_pathPoints[i] = transform.GetChild(i).gameObject;
         }
-        Points = m_pathPoints.Select(x => (Vector2)x.transform.position).ToArray();
+
+        // Each point is the anchored position of the transform.
+        Points = m_pathPoints.Select(x => x.GetComponent<RectTransform>().anchoredPosition).ToArray();
     }
 }

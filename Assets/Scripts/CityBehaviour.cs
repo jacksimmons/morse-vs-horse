@@ -41,7 +41,8 @@ public class CityBehaviour : MonoBehaviour
                 continue;
 
             // Add the above-determined path.
-            m_adjacentPaths.Add(new Path(path.ToArray(), this, GetPathDest(destChar)));
+            Path p = new(path.ToArray(), this, GetPathDest(destChar));
+            m_adjacentPaths.Add(p);
         }
 
         AdjacentPaths = new(m_adjacentPaths);
