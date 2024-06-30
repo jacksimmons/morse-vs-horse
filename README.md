@@ -10,6 +10,6 @@ Or execute a build under Builds.
 + [ ] Month 2: A polished version of the game with 3 maps (beta version)
 
 ## Credits
-Code: Jack
-Art: James
-Sound: Sean
+Code: Jack  
+Art: James  
+Sound: Sean  
