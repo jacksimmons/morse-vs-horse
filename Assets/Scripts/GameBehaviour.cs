@@ -71,6 +71,7 @@ public class GameBehaviour : MonoBehaviour
         
         // Easy takes ~20s so spawn every 15s
         QueuePonySpawn(1, Difficulty.Easy);
+        QueuePonySpawn(10, Difficulty.Easy);
         //QueuePonySpawn(40, Difficulty.Easy);
 
         //QueuePonySpawn(50, Difficulty.Hard);

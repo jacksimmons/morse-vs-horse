@@ -33,6 +33,11 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// </summary>
     private CityBehaviour m_city;
 
+    [SerializeField]
+    private Image m_glow;
+    [SerializeField]
+    private Image m_scroll;
+
     /// <summary>
     /// The index of this earl's message in the EarlManager's Words list.
     /// </summary>
@@ -62,7 +67,7 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             if (Manager.CurrentMorseTarget == MorseCode.EnglishStringToMorseString(Manager.Messages[m_index]))
             {
                 Manager.CurrentMorseTarget = null;
-                m_targetHandler.SetTarget("", m_pony);
+                m_targetHandler.CompleteTarget();
             }
 
             // Earl disappear
@@ -78,7 +83,7 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         if (Pony.PonyActive)
         {
-            m_targetHandler.SetTarget(Manager.Messages[m_index], Pony);
+            m_targetHandler.SetTarget(Manager.Messages[m_index]);
             Pony.SetPathPulse(true);
         }
     }
@@ -92,7 +97,7 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         if (Pony.PonyActive)
         {
-            m_targetHandler.SetTarget(MorseCode.MorseStringToEnglishString(Manager.CurrentMorseTarget ?? new()), m_pony);
+            m_targetHandler.SetTarget(MorseCode.MorseStringToEnglishString(Manager.CurrentMorseTarget ?? new()));
             Pony.SetPathPulse(false);
         }
     }
@@ -103,15 +108,16 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         if (Pony.PonyActive)
         {
             Manager.CurrentMorseTarget = MorseCode.EnglishStringToMorseString(Manager.Messages[m_index]);
+            m_targetHandler.SetPony(Pony);
         }
     }
 
 
     public void ActivateEarl(Difficulty diff)
     {
-        // Display and enable earl button.
-        GetComponent<Image>().enabled = true;
         GetComponent<Button>().enabled = true;
+        m_glow.enabled = true;
+        m_scroll.enabled = true;
 
         if (Pony.gameObject.activeSelf)
         {
@@ -145,9 +151,9 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     private void DeactivateEarl()
     {
-        // Hide earl button.
-        GetComponent<Image>().enabled = false;
         GetComponent<Button>().enabled = false;
+        m_glow.enabled = false;
+        m_scroll.enabled = false;
 
         // Set activity flag
         EarlActive = false;

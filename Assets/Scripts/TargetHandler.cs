@@ -25,10 +25,9 @@ public class TargetHandler : MonoBehaviour
 
 
     /// <summary>
-    /// Set the display text of the target morse string, and the pony attempting to deliver
-    /// the same message.
+    /// Set the display text of the target morse string.
     /// </summary>
-    public void SetTarget(string targetTxt, PonyBehaviour pony)
+    public void SetTarget(string targetTxt)
     {
         if (SaveData.Instance.easyMode)
         {
@@ -39,7 +38,11 @@ public class TargetHandler : MonoBehaviour
         {
             m_targetText.text = targetTxt;
         }
+    }
 
+
+    public void SetPony(PonyBehaviour pony)
+    {
         m_targetPony = pony;
     }
 
@@ -52,6 +55,8 @@ public class TargetHandler : MonoBehaviour
         }
 
         m_targetPony.Explode();
-        SetTarget("", null);
+        m_targetPony = null;
+        SetTarget("");
+        GetComponent<EarlManager>().CurrentMorseTarget = null;
     }
 }
