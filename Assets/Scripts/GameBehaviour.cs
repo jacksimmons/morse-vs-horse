@@ -57,6 +57,9 @@ public class GameBehaviour : MonoBehaviour
     private List<EarlBehaviour> m_inactiveEarls = new();
     private List<EarlBehaviour> m_activeEarls = new();
 
+    [SerializeField]
+    private AudioSource m_ponySfx;
+
     private bool m_checkNoMessagesLeft = false;
 
 
@@ -110,6 +113,9 @@ public class GameBehaviour : MonoBehaviour
     {
         m_livesLost++;
 
+        GetComponent<TargetHandler>().SetTarget("");
+        GetComponent<TargetHandler>().SetPony(null);
+
         // Go to next life lost sprite.
         if (m_livesLost < m_livesLostSprites.Length)
             m_livesImage.sprite = m_livesLostSprites[m_livesLost];
@@ -142,6 +148,7 @@ public class GameBehaviour : MonoBehaviour
             // Move the earl to active earls.
             m_inactiveEarls.Remove(earl);
             m_activeEarls.Add(earl);
+            m_ponySfx.Play();
         }));
     }
 }
