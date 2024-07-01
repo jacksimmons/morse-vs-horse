@@ -24,16 +24,6 @@ public struct MorseChar : IEquatable<MorseChar>
     /// </summary>
     public static MorseChar Empty => new();
 
-    /// <summary>
-    /// Returns a morse char representing a gap between characters.
-    /// </summary>
-    public static MorseChar CharBreak => new(EMorseSignal.CharBreak);
-
-    /// <summary>
-    /// Returns a morse char representing a gap between words.
-    /// </summary>
-    public static MorseChar WordBreak => new(EMorseSignal.WordBreak);
-
     public EMorseSignal Sig1;
     public EMorseSignal Sig2;
     public EMorseSignal Sig3;
@@ -122,8 +112,6 @@ public class MorseString : IEquatable<MorseString>
 
     public void AddChar(MorseChar ch)
     {
-        if (Items.Count > 0)
-            Items.Add(MorseChar.CharBreak);
         Items.Add(ch);
     }
 
@@ -145,8 +133,11 @@ public class MorseString : IEquatable<MorseString>
         string ret = "";
         foreach (MorseChar ch in Items)
         {
-            ret += ch.ToString();
+            ret += ch.ToString() + '/';
         }
+
+        // Remove trailing '/'
+        if (ret.Length > 0) return ret.Remove(ret.Length - 1, 1);
         return ret;
     }
 }
@@ -165,11 +156,6 @@ public static class MorseCode
     /// Dash signal must have an input duration of at least ... seconds.
     /// </summary>
     public const float DASH_SIG_LONGER_THAN = 0.3f;
-
-    /// <summary>
-    /// Character breaks must have at least ... seconds of waiting.
-    /// </summary>
-    public const float CHAR_BREAK_LONGER_THAN = 1f;
 
 
     private static readonly Dictionary<char, MorseChar> s_charToMorseChar = new Dictionary<char, MorseChar>
@@ -281,8 +267,6 @@ public static class MorseCode
         {
             EMorseSignal.Dot => ".",
             EMorseSignal.Dash => "-",
-            EMorseSignal.CharBreak => "/",
-            EMorseSignal.WordBreak => "",
             _ => "",
         };
     }

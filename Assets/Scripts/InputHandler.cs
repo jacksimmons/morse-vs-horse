@@ -18,7 +18,7 @@ public class InputHandler : MonoBehaviour
     /// Input from the user corresponding to the current Morse Code character
     /// e.g. .-
     /// </summary>
-    private MorseChar m_morseCharInput;
+    private MorseChar m_morseCharInput = new();
     public MorseChar MorseCharInput => m_morseCharInput;
 
     /// <summary>
@@ -105,8 +105,13 @@ public class InputHandler : MonoBehaviour
             // Handle character breaks (if the current character is valid)
             else if (MorseCode.MorseCharToEnglishChar(m_morseCharInput) != "")
             {
-                m_timeSinceLastSignal += Time.deltaTime;
-                if (m_timeSinceLastSignal > MorseCode.CHAR_BREAK_LONGER_THAN)
+                //m_timeSinceLastSignal += Time.deltaTime;
+                
+                // The string does not yet have the char appended, so index = count (* 2 to account for char breaks).
+                int charIndex = m_morseStringInput.Items.Count;
+
+                // If the current character is correct, allow a character break
+                if (m_earlManager.CurrentMorseTarget.Items[charIndex].Equals(m_morseCharInput))
                 {
                     m_morseStringInput.AddChar(m_morseCharInput);
                     m_morseCharInput = MorseChar.Empty;
