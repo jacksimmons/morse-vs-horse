@@ -138,6 +138,7 @@ public class GameBehaviour : MonoBehaviour
                 return;
             }
 
+            // Choose a random inactive city to send a message.
             EarlBehaviour earl = m_inactiveEarls[Random.Range(0, m_inactiveEarls.Count)];
 
             // Activate the pony and earl UI.

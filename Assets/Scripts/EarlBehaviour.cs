@@ -157,5 +157,8 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
         // Set activity flag
         EarlActive = false;
+
+        // Disable pulsing
+        m_pony.SetPathPulse(false);
     }
 }

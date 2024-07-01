@@ -133,7 +133,6 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
                 m_ponyImage.transform.localScale = new Vector3(prevXScaleSize, prevScale.y, prevScale.z);
 
             // Ensure pony position is correct at the start of an edge.
-            print(m_currentEdge.Start);
             m_pony.GetComponent<RectTransform>().anchoredPosition = m_currentEdge.Start;
         }
     }
@@ -243,7 +242,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// </summary>
     public void Explode()
     {
-        Destroy(gameObject);
+        gameObject.SetActive(false);
         PonyActive = false;
     }
 
@@ -280,15 +279,6 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         for (int i = 0; i < m_ponyPaths.Count; i++)
         {
             m_ponyPaths[i].GetComponent<TelegraphLineBehaviour>().SetPulsing(pulse);
-        }
-    }
-
-
-    public void SetPathLocked(bool locked)
-    {
-        for (int i = 0; i < m_ponyPaths.Count; i++)
-        {
-            m_ponyPaths[i].GetComponent<TelegraphLineBehaviour>().SetLocked(locked);
         }
     }
 }

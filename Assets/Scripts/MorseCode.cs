@@ -156,6 +156,22 @@ public static class MorseCode
 {
     // ------------------------------------ STATIC VARS -------------------------------------------
 
+    /// <summary>
+    /// Dot signal must have an input duration of at least ... seconds.
+    /// </summary>
+    public const float DOT_SIG_LONGER_THAN = 0.01f;
+
+    /// <summary>
+    /// Dash signal must have an input duration of at least ... seconds.
+    /// </summary>
+    public const float DASH_SIG_LONGER_THAN = 0.3f;
+
+    /// <summary>
+    /// Character breaks must have at least ... seconds of waiting.
+    /// </summary>
+    public const float CHAR_BREAK_LONGER_THAN = 1f;
+
+
     private static readonly Dictionary<char, MorseChar> s_charToMorseChar = new Dictionary<char, MorseChar>
     {
         { 'A', new(EMorseSignal.Dot, EMorseSignal.Dash) },
@@ -194,7 +210,6 @@ public static class MorseCode
         { '8', new(EMorseSignal.Dash, EMorseSignal.Dash, EMorseSignal.Dash, EMorseSignal.Dot, EMorseSignal.Dot) },
         { '9', new(EMorseSignal.Dash, EMorseSignal.Dash, EMorseSignal.Dash, EMorseSignal.Dash, EMorseSignal.Dot) },
         { '0', new(EMorseSignal.Dash, EMorseSignal.Dash, EMorseSignal.Dash, EMorseSignal.Dash, EMorseSignal.Dash) },
-        { ' ', MorseChar.WordBreak }
     };
 
 

@@ -12,14 +12,12 @@ public class TelegraphLineBehaviour : MonoBehaviour
     [SerializeField]
     private Image m_telegraphImage;
     private bool m_telegraphPulsing = false;
-    private bool m_telegraphLocked = false;
     private static readonly Color m_telegraphPulseMin = Color.white;
     private static readonly Color m_telegraphPulseMax = Color.red;
     private float m_pulseUpElapsed = 0;
     private float m_pulseDownElapsed = 0;
     private bool m_pulseUpElseDown = true;
     private const float PULSE_TIME = 2f;
-    private int m_orderInPath;
 
 
     private void Awake()
@@ -31,12 +29,8 @@ public class TelegraphLineBehaviour : MonoBehaviour
     private void Update()
     {
         // Default case
-        if (!m_telegraphLocked && !m_telegraphPulsing)
+        if (!m_telegraphPulsing)
             m_telegraphImage.color = m_telegraphPulseMin;
-
-        // Locked case overrides Default case
-        if (m_telegraphLocked)
-            m_telegraphImage.color = m_telegraphPulseMax;
 
         // Pulsing case overrides Locked case
         if (m_telegraphPulsing)
@@ -74,13 +68,6 @@ public class TelegraphLineBehaviour : MonoBehaviour
     {
         UpdateTelegraphLayer(pulsing);
         m_telegraphPulsing = pulsing;
-    }
-
-
-    public void SetLocked(bool locked)
-    {
-        UpdateTelegraphLayer(locked);
-        m_telegraphLocked = locked;
     }
 
 

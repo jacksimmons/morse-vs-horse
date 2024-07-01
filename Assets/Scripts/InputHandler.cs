@@ -12,30 +12,14 @@ public class InputHandler : MonoBehaviour
     [SerializeField]
     private TargetHandler m_targetHandler;
 
-
-    private const KeyCode INPUT_KEY = KeyCode.Space;
-
-    /// <summary>
-    /// Dash signal must have an input duration of at least ... seconds.
-    /// </summary>
-    private const float DASH_SIG_LONGER_THAN = 0.5f; // seconds
-
-    /// <summary>
-    /// Character break must have no input for at least ... seconds.
-    /// </summary>
-    private const float CHAR_BREAK_LONGER_THAN = 2f; // seconds
-
-    /// <summary>
-    /// Word break must have no input for at least ... seconds.
-    /// </summary>
-    private const float WORD_BREAK_LONGER_THAN = 4f; // seconds
-
+    private const KeyCode SIGNAL_KEY = KeyCode.Space;
 
     /// <summary>
     /// Input from the user corresponding to the current Morse Code character
     /// e.g. .-
     /// </summary>
     private MorseChar m_morseCharInput;
+    public MorseChar MorseCharInput => m_morseCharInput;
 
     /// <summary>
     /// Input from the user joining all MorseChar inputs to make a word/sentence.
@@ -84,18 +68,13 @@ public class InputHandler : MonoBehaviour
 
     private void HandleMorseInput()
     {
-        if (Input.GetKeyDown(INPUT_KEY))
+        if (Input.GetKeyDown(SIGNAL_KEY))
         {
             m_morseSfx.Play();
         }
 
-        if (Input.GetKeyUp(INPUT_KEY))
-        {
-            m_morseSfx.Pause();
-        }
-
         // If input is held...
-        if (Input.GetKey(INPUT_KEY))
+        if (Input.GetKey(SIGNAL_KEY))
         {
             m_currentSignalLength += Time.deltaTime;
         }
@@ -103,35 +82,34 @@ public class InputHandler : MonoBehaviour
         else
         {
             // Handle key release (Dot or Dash)
-            if (Input.GetKeyUp(INPUT_KEY))
+            if (Input.GetKeyUp(SIGNAL_KEY))
             {
-                EMorseSignal sig = EMorseSignal.Dot;
-                if (m_currentSignalLength > DASH_SIG_LONGER_THAN)
-                    sig = EMorseSignal.Dash;
+                // Stop the dit dah sfx
+                m_morseSfx.Pause();
 
-                m_morseCharInput.AddSig(sig);
+                // Add the correct signal type
+                if (m_currentSignalLength > MorseCode.DASH_SIG_LONGER_THAN)
+                {
+                    m_morseCharInput.AddSig(EMorseSignal.Dash);
+                }
+                else if (m_currentSignalLength > MorseCode.DOT_SIG_LONGER_THAN)
+                {
+                    m_morseCharInput.AddSig(EMorseSignal.Dot);
+                }
+
+                // The signal has ended.
                 m_timeSinceLastSignal = 0;
                 m_currentSignalLength = 0;
             }
-            // Handle character breaks (if char input is not empty)
-            else if (m_morseCharInput.Sig1 != EMorseSignal.None)
+
+            // Handle character breaks (if the current character is valid)
+            else if (MorseCode.MorseCharToEnglishChar(m_morseCharInput) != "")
             {
                 m_timeSinceLastSignal += Time.deltaTime;
-                if (m_timeSinceLastSignal > CHAR_BREAK_LONGER_THAN)
+                if (m_timeSinceLastSignal > MorseCode.CHAR_BREAK_LONGER_THAN)
                 {
                     m_morseStringInput.AddChar(m_morseCharInput);
                     m_morseCharInput = MorseChar.Empty;
-                }
-            }
-            // Handle word breaks (if char break has already happened, and last char was not a word break)
-            else if (m_timeSinceLastSignal > CHAR_BREAK_LONGER_THAN && m_morseStringInput.Items.Count > 0
-                && !m_morseStringInput.Items[^1].Equals(MorseChar.WordBreak))
-            {
-                m_timeSinceLastSignal += Time.deltaTime;
-                if (m_timeSinceLastSignal > WORD_BREAK_LONGER_THAN)
-                {
-                    m_morseStringInput.AddChar(MorseChar.WordBreak);
-                    m_timeSinceLastSignal = 0;
                 }
             }
         }
@@ -142,8 +120,19 @@ public class InputHandler : MonoBehaviour
     {
         // Visualise morse code input (morse string + the current unfinished char)
         MorseString visualiser = new(m_morseStringInput);
-        visualiser.AddChar(m_morseCharInput);
+        MorseChar visualisedChar = m_morseCharInput;
 
+        // Add a visualisation for the current signal
+        if (m_currentSignalLength > MorseCode.DASH_SIG_LONGER_THAN)
+        {
+            visualisedChar.AddSig(EMorseSignal.Dash);
+        }
+        else if (m_currentSignalLength > MorseCode.DOT_SIG_LONGER_THAN)
+        {
+            visualisedChar.AddSig(EMorseSignal.Dot);
+        }
+
+        visualiser.AddChar(visualisedChar);
         m_inputText.text = visualiser.ToString();
     }
 
