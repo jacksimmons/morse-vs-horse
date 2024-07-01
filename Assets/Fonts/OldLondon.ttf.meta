@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 3ad8a1d65dbf6154cb28655316ef62db
+guid: f17908f84c965724b83747fc9f039d91
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Morso kode
+  - Old London
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
