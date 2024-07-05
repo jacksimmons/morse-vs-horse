@@ -150,7 +150,7 @@ public static class MorseCode
     /// <summary>
     /// Dot signal must have an input duration of at least ... seconds.
     /// </summary>
-    public const float DOT_SIG_LONGER_THAN = 0.01f;
+    public const float DOT_SIG_LONGER_THAN = 0.0f;
 
     /// <summary>
     /// Dash signal must have an input duration of at least ... seconds.

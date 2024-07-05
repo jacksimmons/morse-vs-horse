@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -10,6 +12,11 @@ public class MainMenuHandler : MonoBehaviour
     private Toggle m_fullscreenToggle;
     [SerializeField]
     private Toggle m_easyModeToggle;
+    [SerializeField]
+    private GameObject m_resolutionLRBtn;
+
+    private Resolution[] m_monitorResolutions;
+
 
     private void Start()
     {
@@ -18,6 +25,11 @@ public class MainMenuHandler : MonoBehaviour
 
         m_fullscreenToggle.isOn = SaveData.Instance.fullscreen;
         m_easyModeToggle.isOn = SaveData.Instance.easyMode;
+
+        m_monitorResolutions = Screen.resolutions;
+
+        // Apply existing resolution and fullscreen settings
+        ApplyVideoSettings();
     }
 
 
@@ -39,5 +51,30 @@ public class MainMenuHandler : MonoBehaviour
     {
         SaveData.Instance.easyMode = toggle;
         Saving.Save();
+    }
+
+
+    public void OnResolutionLRBtnPressed(bool right)
+    {
+        int resIndex = Array.IndexOf(m_monitorResolutions, SaveData.Instance.resolution);
+        Debug.Assert(resIndex != -1, "Monitor does not support resolution settings.");
+        resIndex = ArrayTools.CircularNextIndex(resIndex, m_monitorResolutions.Length, right);
+
+        SaveData.Instance.resolution = m_monitorResolutions[resIndex];
+        ApplyVideoSettings();
+        Saving.Save();
+    }
+
+
+    private void ApplyVideoSettings()
+    {
+        Resolution res = SaveData.Instance.resolution;
+        if (Array.IndexOf(m_monitorResolutions, res) == -1)
+        {
+            Debug.Assert(m_monitorResolutions.Length > 0, "Monitor supports no resolutions!");
+            res = m_monitorResolutions[0];
+        }
+        m_resolutionLRBtn.transform.Find("Text").GetComponent<TMP_Text>().text = $"Resolution: {SaveData.Instance.resolution}";
+        Screen.SetResolution(res.width, res.height, SaveData.Instance.fullscreen);
     }
 }

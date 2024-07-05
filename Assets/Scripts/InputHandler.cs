@@ -73,6 +73,17 @@ public class InputHandler : MonoBehaviour
             m_morseSfx.Play();
         }
 
+        if (Input.GetKeyUp(SIGNAL_KEY))
+        {
+            m_morseSfx.Pause();
+        }
+
+        // If there is no target, ignore logic past the sfx.
+        if (m_earlManager.CurrentMorseTarget == null)
+        {
+            return;
+        }
+
         // If input is held...
         if (Input.GetKey(SIGNAL_KEY))
         {
@@ -84,9 +95,6 @@ public class InputHandler : MonoBehaviour
             // Handle key release (Dot or Dash)
             if (Input.GetKeyUp(SIGNAL_KEY))
             {
-                // Stop the dit dah sfx
-                m_morseSfx.Pause();
-
                 // Add the correct signal type
                 if (m_currentSignalLength > MorseCode.DASH_SIG_LONGER_THAN)
                 {

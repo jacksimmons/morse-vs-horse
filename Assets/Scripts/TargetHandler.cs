@@ -18,8 +18,8 @@ public class TargetHandler : MonoBehaviour
     {
         if (SaveData.Instance.easyMode)
         {
-            m_targetHintLabel.gameObject.SetActive(true);
-            m_targetHintText.gameObject.SetActive(true);
+            m_targetHintLabel.enabled = true;
+            m_targetHintText.enabled = true;
         }
     }
 

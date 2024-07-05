@@ -1,15 +1,10 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
-
-public enum Level
-{
-    Level0,
-    Level1,
-}
 
 /// <summary>
 /// Controls the rate of pony spawns & their difficulties.
@@ -31,9 +26,31 @@ public enum Difficulty
 }
 
 
+public struct PonySpawn
+{
+    public int Start { get; set; }
+    public Difficulty Diff { get; set; }
+}
+
+
 public class GameBehaviour : MonoBehaviour
 {
-    public Level CurrentLevel { get; private set; }
+    private static PonySpawn[][] m_levelSpawns = new PonySpawn[][]
+    {
+        // Level 1
+        new PonySpawn[] {
+            new() { Start = 1, Diff = Difficulty.Easy },
+            new() { Start = 12, Diff = Difficulty.Easy },
+            new() { Start = 24, Diff = Difficulty.Easy },
+            new() { Start = 36, Diff = Difficulty.Easy },
+            new() { Start = 48, Diff = Difficulty.Easy }
+        }
+    };
+
+    /// <summary>
+    /// The current level being played.
+    /// </summary>
+    private int m_level;
 
     [SerializeField]
     private Image m_livesImage;
@@ -71,13 +88,9 @@ public class GameBehaviour : MonoBehaviour
         {
             m_inactiveEarls.Add(city.GetComponentInChildren<EarlBehaviour>());
         }
-        
+
         // Easy takes ~20s so spawn every 15s
-        QueuePonySpawn(1, Difficulty.Easy);
-        QueuePonySpawn(10, Difficulty.Easy);
-        QueuePonySpawn(20, Difficulty.Easy);
-        QueuePonySpawn(30, Difficulty.Easy);
-        QueuePonySpawn(40, Difficulty.Easy);
+        SpawnLevel();
 
         // Activate victory check after all ponies have spawned
         StartCoroutine(Wait.WaitThen(40, () => m_checkNoMessagesLeft = true));
@@ -101,26 +114,25 @@ public class GameBehaviour : MonoBehaviour
         {
             if (m_activeEarls.Count == 0)
             {
-                m_victoryPanel.SetActive(true);
+                HandleVictory();
             }
         }
     }
 
 
-    public void LoseLife()
+    private void SpawnLevel()
     {
-        m_livesLost++;
+        if (m_level >= m_levelSpawns.Length)
+        {
+            Debug.LogError("No spawn info for this level.");
+            return;
+        }
 
-        GetComponent<TargetHandler>().SetTarget("");
-        GetComponent<TargetHandler>().SetPony(null);
-
-        // Go to next life lost sprite.
-        if (m_livesLost < m_livesLostSprites.Length)
-            m_livesImage.sprite = m_livesLostSprites[m_livesLost];
-
-        // All lives lost sprites seen, and another life lost => death.
-        else
-            m_gameOverPanel.SetActive(true);
+        for (int i = 0; i < m_levelSpawns[m_level].Length; i++)
+        {
+            PonySpawn ps = m_levelSpawns[m_level][i];
+            QueuePonySpawn(ps.Start, ps.Diff);
+        }
     }
 
 
@@ -149,5 +161,28 @@ public class GameBehaviour : MonoBehaviour
             m_activeEarls.Add(earl);
             m_ponySfx.Play();
         }));
+    }
+
+
+    public void LoseLife()
+    {
+        m_livesLost++;
+
+        GetComponent<TargetHandler>().SetTarget("");
+        GetComponent<TargetHandler>().SetPony(null);
+
+        // Go to next life lost sprite.
+        if (m_livesLost < m_livesLostSprites.Length)
+            m_livesImage.sprite = m_livesLostSprites[m_livesLost];
+
+        // All lives lost sprites seen, and another life lost => death.
+        else
+            m_gameOverPanel.SetActive(true);
+    }
+
+
+    private void HandleVictory()
+    {
+        m_victoryPanel.SetActive(true);
     }
 }

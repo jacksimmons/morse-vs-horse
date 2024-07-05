@@ -19,10 +19,10 @@ public class SaveData
         }
     }
 
-    public Level level;
-    public bool hasPlayerClickedOnMapButton;
-    public bool fullscreen;
-    public bool easyMode;
+    public byte highestLevelBeaten = 0;
+    public bool fullscreen = false;
+    public bool easyMode = false;
+    public Resolution resolution = Screen.currentResolution;
 }
 
 
