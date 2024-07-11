@@ -74,7 +74,10 @@ public class MainMenuHandler : MonoBehaviour
             Debug.Assert(m_monitorResolutions.Length > 0, "Monitor supports no resolutions!");
             res = m_monitorResolutions[0];
         }
-        m_resolutionLRBtn.transform.Find("Text").GetComponent<TMP_Text>().text = $"Resolution: {SaveData.Instance.resolution}";
+
+        string resText = $"Resolution: {res.width}x{res.height} @ {Mathf.RoundToInt((float)res.refreshRateRatio.value)}Hz";
+
+        m_resolutionLRBtn.transform.Find("Text").GetComponent<TMP_Text>().text = resText;
         Screen.SetResolution(res.width, res.height, SaveData.Instance.fullscreen);
     }
 }
