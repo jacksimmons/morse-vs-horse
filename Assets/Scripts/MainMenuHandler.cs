@@ -68,6 +68,18 @@ public class MainMenuHandler : MonoBehaviour
     }
 
 
+    private void Update()
+    {
+        // ! Debug reset
+        if (Input.GetKeyDown(KeyCode.B) && Input.GetKey(KeyCode.I) && Input.GetKey(KeyCode.G))
+        {
+            SaveData.Reset();
+            Saving.Save();
+            SceneManager.LoadScene("Main");
+        }
+    }
+
+
     public void OnLevelBtnClicked(int level)
     {
         SceneManager.LoadScene("Game");

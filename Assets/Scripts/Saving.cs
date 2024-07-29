@@ -7,6 +7,9 @@ using UnityEngine;
 [Serializable]
 public class SaveData
 {
+    public const int HIGHEST_LEVEL = 2;
+
+
     private static SaveData m_inst;
     public static SaveData Instance
     {
@@ -19,8 +22,8 @@ public class SaveData
             return m_inst;
         }
     }
+    public static void Reset() { m_inst = new(); }
 
-    public const int HIGHEST_LEVEL = 2;
 
     /// <summary>
     /// A questionable practice, where the last selected level (from main menu) is saved here.
