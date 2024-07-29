@@ -29,6 +29,7 @@ public enum WordDifficulty
 
 public enum PonyType
 {
+    Boss,
     Person,
     Pony,
     Train
@@ -198,12 +199,16 @@ public class GameBehaviour : MonoBehaviour
     }
 
 
-    public void LoseLife()
+    public void LoseLife(string wordLost)
     {
         m_livesLost++;
 
-        GetComponent<TargetHandler>().SetTarget("");
-        GetComponent<TargetHandler>().SetPony(null);
+        TargetHandler th = GetComponent<TargetHandler>();
+        if (th.Target == wordLost)
+        {
+            th.Target = "";
+            th.SetPony(null);
+        }
 
         // Go to next life lost sprite.
         if (m_livesLost < m_livesLostSprites.Length)

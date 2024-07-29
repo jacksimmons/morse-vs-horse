@@ -17,7 +17,7 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// <summary>
     /// Manager script for all earls.
     /// </summary>
-    private static EarlManager Manager => GameObject.FindWithTag("GameController").GetComponent<EarlManager>();
+    public static EarlManager Manager => GameObject.FindWithTag("GameController").GetComponent<EarlManager>();
 
     public bool EarlActive { get; private set; } = false;
 
@@ -41,7 +41,7 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// <summary>
     /// The index of this earl's message in the EarlManager's Words list.
     /// </summary>
-    private int m_index;
+    public int Index { get; private set; }
 
     private TargetHandler m_targetHandler;
 
@@ -64,7 +64,7 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         if (EarlActive && !Pony.PonyActive)
         {
             // Message disappear
-            if (Manager.CurrentMorseTarget == MorseCode.EnglishStringToMorseString(Manager.Messages[m_index]))
+            if (Manager.CurrentMorseTarget == MorseCode.EnglishStringToMorseString(Manager.Messages[Index]))
             {
                 Manager.CurrentMorseTarget = null;
                 m_targetHandler.CompleteTarget();
@@ -83,7 +83,7 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         if (Pony.PonyActive)
         {
-            m_targetHandler.SetTarget(Manager.Messages[m_index]);
+            m_targetHandler.Target = Manager.Messages[Index];
             Pony.SetPathPulse(true);
         }
     }
@@ -97,7 +97,7 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         if (Pony.PonyActive)
         {
-            m_targetHandler.SetTarget(MorseCode.MorseStringToEnglishString(Manager.CurrentMorseTarget ?? new()));
+            m_targetHandler.Target = MorseCode.MorseStringToEnglishString(Manager.CurrentMorseTarget ?? new());
             Pony.SetPathPulse(false);
         }
     }
@@ -107,7 +107,7 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         if (Pony.PonyActive)
         {
-            Manager.CurrentMorseTarget = MorseCode.EnglishStringToMorseString(Manager.Messages[m_index]);
+            Manager.CurrentMorseTarget = MorseCode.EnglishStringToMorseString(Manager.Messages[Index]);
             m_targetHandler.SetPony(Pony);
         }
     }
@@ -142,7 +142,7 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             Debug.LogError("Not enough words for the number of earls placed.");
         }
 
-        m_index = Manager.AddMessage(message);
+        Index = Manager.AddMessage(message);
 
         // Set activity flag
         EarlActive = true;

@@ -6,6 +6,27 @@ public class TargetHandler : MonoBehaviour
 {
     [SerializeField]
     private TMP_Text m_targetText;
+    public string Target
+    {
+        set
+        {
+            if (SaveData.Instance.easyMode)
+            {
+                m_targetText.text = value;
+                m_targetHintText.text = $"{MorseCode.EnglishStringToMorseString(value)}";
+            }
+            else
+            {
+                m_targetText.text = value;
+            }
+        }
+
+        get
+        {
+            return m_targetText.text;
+        }
+    }
+
     [SerializeField]
     private TMP_Text m_targetHintLabel;
     [SerializeField]
@@ -27,18 +48,7 @@ public class TargetHandler : MonoBehaviour
     /// <summary>
     /// Set the display text of the target morse string.
     /// </summary>
-    public void SetTarget(string targetTxt)
-    {
-        if (SaveData.Instance.easyMode)
-        {
-            m_targetText.text = targetTxt;
-            m_targetHintText.text = $"{MorseCode.EnglishStringToMorseString(targetTxt)}";
-        }
-        else
-        {
-            m_targetText.text = targetTxt;
-        }
-    }
+
 
 
     public void SetPony(PonyBehaviour pony)
@@ -56,7 +66,7 @@ public class TargetHandler : MonoBehaviour
 
         m_targetPony.Explode();
         m_targetPony = null;
-        SetTarget("");
+        Target = "";
         GetComponent<EarlManager>().CurrentMorseTarget = null;
     }
 }

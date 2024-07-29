@@ -40,11 +40,11 @@ public class SaveData
     /// <summary>
     /// Music volume, from 0 to 100.
     /// </summary>
-    public float musicVolume;
+    public float musicVolume = 50;
     /// <summary>
     /// SFX volume, from 0 to 100.
     /// </summary>
-    public float sfxVolume;
+    public float sfxVolume = 50;
 }
 
 

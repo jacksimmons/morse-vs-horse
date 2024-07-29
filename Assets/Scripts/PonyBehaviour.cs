@@ -41,7 +41,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
         public Pony(PonyType type, PonyBehaviour pony, Path path)
         {
-            m_speed = 7 + 3.5f * (int)type;
+            m_speed = 5 + 3 * (int)type;
             m_pony = pony;
             m_ponyImage = pony.GetComponentInChildren<Image>();
             m_ponyTimer = pony.GetComponentInChildren<TMP_Text>();
@@ -154,6 +154,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     private void Start()
     {
         m_gb = GameObject.FindWithTag("GameController").GetComponent<GameBehaviour>();
+        m_earl = transform.parent.Find("Earl").GetComponent<EarlBehaviour>();
     }
 
 
@@ -248,7 +249,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     private void OnGoalReached()
     {
-        m_gb.LoseLife();
+        m_gb.LoseLife(EarlBehaviour.Manager.Messages[m_earl.Index]);
         Explode();
     }
 
