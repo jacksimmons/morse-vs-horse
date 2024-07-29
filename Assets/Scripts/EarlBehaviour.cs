@@ -113,7 +113,7 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     }
 
 
-    public void ActivateEarl(Difficulty diff)
+    public void ActivateEarl(WordDifficulty diff, PonyType type)
     {
         GetComponent<Button>().enabled = true;
         m_glow.enabled = true;
@@ -125,10 +125,10 @@ public class EarlBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         }
 
         Pony.gameObject.SetActive(true);
-        Pony.ActivatePony(diff, m_city, (int)diff + 1);
+        Pony.ActivatePony(type, m_city, 1);
 
-        // Assign the earl's word based on provided difficulty.
-        List<string> messages = Manager.GetUnusedMessagesOfDifficulty(diff);
+        // Assign the earl's word based on provided WordDifficulty.
+        List<string> messages = Manager.GetUnusedMessagesOfWordDifficulty(diff);
         
         // Separate the words file by newlines, then remove all words that have already been selected.
         string message = "";

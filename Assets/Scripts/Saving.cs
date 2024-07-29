@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 
@@ -19,10 +20,28 @@ public class SaveData
         }
     }
 
-    public byte highestLevelBeaten = 0;
+    public const int HIGHEST_LEVEL = 2;
+
+    /// <summary>
+    /// A questionable practice, where the last selected level (from main menu) is saved here.
+    /// </summary>
+    public int levelSelected = 0;
+
+    public int highestLevelBeaten = -1;
     public bool fullscreen = false;
     public bool easyMode = false;
-    public Resolution resolution = Screen.currentResolution;
+
+    // Get the first valid resolution
+    public Resolution resolution = AspectRatio.GetSupportedResolutions()[0];
+
+    /// <summary>
+    /// Music volume, from 0 to 100.
+    /// </summary>
+    public float musicVolume;
+    /// <summary>
+    /// SFX volume, from 0 to 100.
+    /// </summary>
+    public float sfxVolume;
 }
 
 

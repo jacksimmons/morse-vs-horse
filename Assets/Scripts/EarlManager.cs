@@ -25,31 +25,34 @@ public class EarlManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Difficulty to list of messages of that difficulty.
+    /// WordDifficulty to list of messages of that WordDifficulty.
     /// All messages originally in the files, including already used messages.
     /// </summary>
-    private Dictionary<Difficulty, List<string>> s_allMessages;
+    private Dictionary<WordDifficulty, List<string>> s_allMessages;
 
 
     private void Awake()
     {
         Messages = new(m_messages);
+
+        int map = SaveData.Instance.levelSelected / 3;
         s_allMessages = new()
         {
-            { Difficulty.Easy, WordListFilenameToList("WordsEasy") },
-            { Difficulty.Medium, WordListFilenameToList("WordsMedium") },
-            { Difficulty.Hard, WordListFilenameToList("WordsHard") }
+            { WordDifficulty.Easy, WordListFilenameToList($"Words/Map{map}/Easy") },
+            { WordDifficulty.Medium, WordListFilenameToList($"Words/Map{map}/Medium") },
+            { WordDifficulty.Hard, WordListFilenameToList($"Words/Map{map}/Hard") },
+            { WordDifficulty.Boss, WordListFilenameToList($"Words/Map{map}/Boss") }
         };
     }
 
 
     /// <summary>
     /// Return a list of messages not used by any earls, and of the provided
-    /// difficulty.
+    /// WordDifficulty.
     /// </summary>
-    public List<string> GetUnusedMessagesOfDifficulty(Difficulty difficulty)
+    public List<string> GetUnusedMessagesOfWordDifficulty(WordDifficulty WordDifficulty)
     {
-        return new(s_allMessages[difficulty].Except(m_messages));
+        return new(s_allMessages[WordDifficulty].Except(m_messages));
     }
 
 

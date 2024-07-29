@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -14,8 +16,18 @@ public class MainMenuHandler : MonoBehaviour
     private Toggle m_easyModeToggle;
     [SerializeField]
     private GameObject m_resolutionLRBtn;
+    [SerializeField]
+    private Slider m_musicVolume;
+    [SerializeField]
+    private Slider m_sfxVolume;
 
-    private Resolution[] m_monitorResolutions;
+    /// <summary>
+    /// The level select for each map (each map has 3 levels).
+    /// </summary>
+    [SerializeField]
+    private GameObject[] m_levelSelects;
+
+    private List<Resolution> m_supportedResolutions;
 
 
     private void Start()
@@ -23,19 +35,43 @@ public class MainMenuHandler : MonoBehaviour
         m_fullscreenToggle.onValueChanged.AddListener(OnFullscreenTogglePressed);
         m_easyModeToggle.onValueChanged.AddListener(OnEasyModeTogglePressed);
 
+        m_musicVolume.onValueChanged.AddListener(OnMusicVolumeValueChanged);
+        m_musicVolume.GetComponentInParent<SliderBehaviour>().SetSliderValue(SaveData.Instance.musicVolume);
+        m_sfxVolume.onValueChanged.AddListener(OnSFXVolumeValueChanged);
+        m_sfxVolume.GetComponentInParent<SliderBehaviour>().SetSliderValue(SaveData.Instance.sfxVolume);
+
         m_fullscreenToggle.isOn = SaveData.Instance.fullscreen;
         m_easyModeToggle.isOn = SaveData.Instance.easyMode;
 
-        m_monitorResolutions = Screen.resolutions;
+        // Enforce 16:9 aspect ratio
+        m_supportedResolutions = new(AspectRatio.GetSupportedResolutions());
+        Debug.Assert(m_supportedResolutions.Count > 0, "No supported resolutions");
 
         // Apply existing resolution and fullscreen settings
         ApplyVideoSettings();
+
+        // Enable level select buttons for all beaten levels (and for the next level to beat)
+        for (int i = 0; i <= SaveData.Instance.highestLevelBeaten + 1 && i <= SaveData.HIGHEST_LEVEL; i++)
+        {
+            Transform levelSelect = m_levelSelects[i / 3].transform.GetChild(i % 3);
+            Button button = levelSelect.GetComponent<Button>();
+            button.interactable = true;
+            
+            // Avoid using iteration variable to define listener
+            {
+                int j = i;
+                button.onClick.AddListener(() => OnLevelBtnClicked(j));
+            }
+
+            levelSelect.Find("Locked").gameObject.SetActive(false);
+        }
     }
 
 
     public void OnLevelBtnClicked(int level)
     {
         SceneManager.LoadScene("Game");
+        SaveData.Instance.levelSelected = level;
     }
 
 
@@ -56,28 +92,40 @@ public class MainMenuHandler : MonoBehaviour
 
     public void OnResolutionLRBtnPressed(bool right)
     {
-        int resIndex = Array.IndexOf(m_monitorResolutions, SaveData.Instance.resolution);
-        Debug.Assert(resIndex != -1, "Monitor does not support resolution settings.");
-        resIndex = ArrayTools.CircularNextIndex(resIndex, m_monitorResolutions.Length, right);
+        int resIndex = m_supportedResolutions.IndexOf(SaveData.Instance.resolution);
+        Debug.Assert(resIndex != -1, "Previous resolution is unsupported.");
 
-        SaveData.Instance.resolution = m_monitorResolutions[resIndex];
+        resIndex = ArrayTools.CircularNextIndex(resIndex, m_supportedResolutions.Count, right);
+        print(resIndex);
+
+        SaveData.Instance.resolution = m_supportedResolutions[resIndex];
         ApplyVideoSettings();
-        Saving.Save();
     }
 
 
     private void ApplyVideoSettings()
     {
         Resolution res = SaveData.Instance.resolution;
-        if (Array.IndexOf(m_monitorResolutions, res) == -1)
-        {
-            Debug.Assert(m_monitorResolutions.Length > 0, "Monitor supports no resolutions!");
-            res = m_monitorResolutions[0];
-        }
+        Debug.Assert(m_supportedResolutions.Contains(res), $"Unsupported resolution: {res}.");
 
         string resText = $"Resolution: {res.width}x{res.height} @ {Mathf.RoundToInt((float)res.refreshRateRatio.value)}Hz";
 
         m_resolutionLRBtn.transform.Find("Text").GetComponent<TMP_Text>().text = resText;
         Screen.SetResolution(res.width, res.height, SaveData.Instance.fullscreen);
+        Saving.Save();
+    }
+
+
+    public void OnMusicVolumeValueChanged(float volume)
+    {
+        SaveData.Instance.musicVolume = volume;
+        Saving.Save();
+    }
+
+
+    public void OnSFXVolumeValueChanged(float volume)
+    {
+        SaveData.Instance.sfxVolume = volume;
+        Saving.Save();
     }
 }

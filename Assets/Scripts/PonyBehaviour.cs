@@ -39,9 +39,9 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         private float m_timerElapsed;
 
 
-        public Pony(Difficulty diff, PonyBehaviour pony, Path path)
+        public Pony(PonyType type, PonyBehaviour pony, Path path)
         {
-            m_timerTotal = 45 + (1 + (int)diff) * 10;
+            m_speed = 7 + 3.5f * (int)type;
             m_pony = pony;
             m_ponyImage = pony.GetComponentInChildren<Image>();
             m_ponyTimer = pony.GetComponentInChildren<TMP_Text>();
@@ -56,7 +56,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
                 totalDist += Vector2.Distance(start, end);
                 numEdges++;
             }
-            m_speed = totalDist / m_timerTotal;
+            m_timerTotal = totalDist / m_speed;
 
             // Convert SerializeFields into PathEdge
             m_path = new PathEdge[numEdges];
@@ -166,11 +166,10 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// <summary>
     /// Activates the pony express, and sets it off on its journey to the destination city.
     /// </summary>
-    /// <param name="diff">Difficulty of the pony/word. Higher difficulty causes pony to take
-    /// longer in total, and causes words to be selected from a harder word list file.</param>
+    /// <param name="type">Type of the pony (person/pony/train/...).
     /// <param name="startCity">The city the pony starts at.</param>
     /// <param name="cityDist">The number of cities the pony travels to.</param>
-    public void ActivatePony(Difficulty diff, CityBehaviour startCity, int cityDist)
+    public void ActivatePony(PonyType type, CityBehaviour startCity, int cityDist)
     {
         // This assertation fixes ridiculous distances, but doesn't cover slightly excessive
         // distances (which are handled below and ignored).
@@ -194,7 +193,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             }
         }
 
-        m_pony = new Pony(diff, this, journey);
+        m_pony = new Pony(type, this, journey);
         PonyActive = true;
     }
 

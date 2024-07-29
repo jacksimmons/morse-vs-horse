@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 
 /// <summary>
 /// Controls the rate of pony spawns & their difficulties.
-/// FNAF style: changable throughout the level to provide dynamic difficulty.
+/// FNAF style: changable throughout the level to provide dynamic WordDifficulty.
 /// </summary>
 public enum GameDiff
 {
@@ -18,39 +18,68 @@ public enum GameDiff
 }
 
 
-public enum Difficulty
+public enum WordDifficulty
 {
     Easy,
     Medium,
-    Hard
+    Hard,
+    Boss
+}
+
+
+public enum PonyType
+{
+    Person,
+    Pony,
+    Train
 }
 
 
 public struct PonySpawn
 {
     public int Start { get; set; }
-    public Difficulty Diff { get; set; }
+    public WordDifficulty Diff { get; set; }
+    public PonyType Type { get; set; }
 }
 
 
 public class GameBehaviour : MonoBehaviour
 {
-    private static PonySpawn[][] m_levelSpawns = new PonySpawn[][]
+    private readonly static PonySpawn[][] m_levelSpawns = new PonySpawn[][]
     {
         // Level 1
-        new PonySpawn[] {
-            new() { Start = 1, Diff = Difficulty.Easy },
-            new() { Start = 12, Diff = Difficulty.Easy },
-            new() { Start = 24, Diff = Difficulty.Easy },
-            new() { Start = 36, Diff = Difficulty.Easy },
-            new() { Start = 48, Diff = Difficulty.Easy }
+        new PonySpawn[]
+        {
+            new() { Start = 1, Diff = WordDifficulty.Easy, Type = PonyType.Pony },
+            new() { Start = 12, Diff = WordDifficulty.Easy, Type = PonyType.Pony },
+            new() { Start = 24, Diff = WordDifficulty.Easy, Type = PonyType.Pony },
+            new() { Start = 36, Diff = WordDifficulty.Easy, Type = PonyType.Pony },
+            new() { Start = 48, Diff = WordDifficulty.Easy, Type = PonyType.Pony }
+        },
+
+        // Level 2
+        new PonySpawn[]
+        {
+            new() { Start = 1, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
+            new() { Start = 12, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
+            new() { Start = 24, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
+            new() { Start = 36, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
+            new() { Start = 48, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
+            new() { Start = 60, Diff = WordDifficulty.Hard, Type = PonyType.Pony }
+        },
+
+        // Level 3
+        new PonySpawn[]
+        {
+            new() { Start = 1, Diff = WordDifficulty.Hard, Type = PonyType.Pony },
+            new() { Start = 12, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
+            new() { Start = 24, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
+            new() { Start = 36, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
+            new() { Start = 48, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
+            new() { Start = 60, Diff = WordDifficulty.Hard, Type = PonyType.Pony },
+            new() { Start = 90, Diff = WordDifficulty.Boss, Type = PonyType.Person },
         }
     };
-
-    /// <summary>
-    /// The current level being played.
-    /// </summary>
-    private int m_level;
 
     [SerializeField]
     private Image m_livesImage;
@@ -68,6 +97,8 @@ public class GameBehaviour : MonoBehaviour
     private GameObject m_gameOverPanel;
     [SerializeField]
     private GameObject m_victoryPanel;
+    [SerializeField]
+    private TMP_Text m_levelText;
 
     [SerializeField]
     private GameObject m_cities;
@@ -117,21 +148,24 @@ public class GameBehaviour : MonoBehaviour
                 HandleVictory();
             }
         }
+
+        // ! Debug cheats
+        if (Input.GetKeyDown(KeyCode.B) && Input.GetKey(KeyCode.I) && Input.GetKey(KeyCode.G))
+        {
+            HandleVictory();
+        }
     }
 
 
     private void SpawnLevel()
     {
-        if (m_level >= m_levelSpawns.Length)
-        {
-            Debug.LogError("No spawn info for this level.");
-            return;
-        }
+        Debug.Assert(SaveData.Instance.levelSelected < m_levelSpawns.Length, $"No level info for level {SaveData.Instance.levelSelected}");
+        m_levelText.text = $"Level {SaveData.Instance.levelSelected + 1}";
 
-        for (int i = 0; i < m_levelSpawns[m_level].Length; i++)
+        for (int i = 0; i < m_levelSpawns[SaveData.Instance.levelSelected].Length; i++)
         {
-            PonySpawn ps = m_levelSpawns[m_level][i];
-            QueuePonySpawn(ps.Start, ps.Diff);
+            PonySpawn ps = m_levelSpawns[SaveData.Instance.levelSelected][i];
+            QueuePonySpawn(ps.Start, ps.Diff, ps.Type);
         }
     }
 
@@ -139,7 +173,7 @@ public class GameBehaviour : MonoBehaviour
     /// <summary>
     /// Queues a random pony spawn in the future (in `seconds` seconds).
     /// </summary>
-    private void QueuePonySpawn(float seconds, Difficulty diff)
+    private void QueuePonySpawn(float seconds, WordDifficulty diff, PonyType type)
     {
         StartCoroutine(Wait.WaitThen(seconds, () =>
         {
@@ -154,7 +188,7 @@ public class GameBehaviour : MonoBehaviour
             EarlBehaviour earl = m_inactiveEarls[Random.Range(0, m_inactiveEarls.Count)];
 
             // Activate the pony and earl UI.
-            earl.ActivateEarl(diff);
+            earl.ActivateEarl(diff, type);
 
             // Move the earl to active earls.
             m_inactiveEarls.Remove(earl);
@@ -184,5 +218,12 @@ public class GameBehaviour : MonoBehaviour
     private void HandleVictory()
     {
         m_victoryPanel.SetActive(true);
+
+        // Update highest level beaten
+        if (SaveData.Instance.highestLevelBeaten < SaveData.Instance.levelSelected)
+        {
+            SaveData.Instance.highestLevelBeaten = SaveData.Instance.levelSelected;
+            Saving.Save();
+        }
     }
 }
