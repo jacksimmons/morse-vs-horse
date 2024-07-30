@@ -1,6 +1,10 @@
 # Morse vs. Horse
 A Unity game being made in line with monthly deadlines.
 
+# The Game
+Transmit messages between cities using morse code (telegraph). Beat the existing
+postal service (the pony express), or the telegraph industry will go bust.
+
 # How to play
 Extract project folder then open it with Unity Hub.
 Or execute a build under Builds.
