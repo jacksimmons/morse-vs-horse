@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,7 +24,8 @@ public enum WordDifficulty
     Easy,
     Medium,
     Hard,
-    Boss
+    Boss,
+    FinalBoss
 }
 
 
@@ -46,7 +48,7 @@ public struct PonySpawn
 
 public class GameBehaviour : MonoBehaviour
 {
-    private readonly static PonySpawn[][] m_levelSpawns = new PonySpawn[][]
+    private PonySpawn[][] m_levelSpawns = new PonySpawn[][]
     {
         // Level 1
         new PonySpawn[]
@@ -111,6 +113,9 @@ public class GameBehaviour : MonoBehaviour
 
     private bool m_checkNoMessagesLeft = false;
 
+    private int m_level;
+    private int m_difficultyBonus;
+
 
     private void Start()
     {
@@ -121,11 +126,8 @@ public class GameBehaviour : MonoBehaviour
             m_inactiveEarls.Add(city.GetComponentInChildren<EarlBehaviour>());
         }
 
-        // Easy takes ~20s so spawn every 15s
-        SpawnLevel();
-
-        // Activate victory check after all ponies have spawned
-        StartCoroutine(Wait.WaitThen(40, () => m_checkNoMessagesLeft = true));
+        m_level = GlobalBehaviour.Instance.Level;
+        StartLevel();
     }
 
 
@@ -146,26 +148,41 @@ public class GameBehaviour : MonoBehaviour
         {
             if (m_activeEarls.Count == 0)
             {
-                HandleVictory();
+                WinLevel();
             }
         }
 
         // ! Debug cheats
         if (Input.GetKeyDown(KeyCode.B) && Input.GetKey(KeyCode.I) && Input.GetKey(KeyCode.G))
         {
-            HandleVictory();
+            WinLevel();
         }
+    }
+
+
+    private void StartLevel()
+    {
+        m_checkNoMessagesLeft = false;
+        SpawnLevel();
+
+        // Activate victory check after all ponies have spawned
+        PonySpawn last = m_levelSpawns[m_level][^1];
+
+        // Check for no messages remaining
+        StartCoroutine(Wait.WaitThen(last.Start, () => m_checkNoMessagesLeft = true));
     }
 
 
     private void SpawnLevel()
     {
-        Debug.Assert(SaveData.Instance.levelSelected < m_levelSpawns.Length, $"No level info for level {SaveData.Instance.levelSelected}");
-        m_levelText.text = $"Level {SaveData.Instance.levelSelected + 1}";
+        Debug.Assert(m_level < m_levelSpawns.Length, $"No level info for level {m_level}");
+        m_levelText.text = $"Level {m_level + 1}";
 
-        for (int i = 0; i < m_levelSpawns[SaveData.Instance.levelSelected].Length; i++)
+        if (GlobalBehaviour.Instance.Endless) m_levelText.text += $" (Difficulty +{m_difficultyBonus})";
+
+        for (int i = 0; i < m_levelSpawns[m_level].Length; i++)
         {
-            PonySpawn ps = m_levelSpawns[SaveData.Instance.levelSelected][i];
+            PonySpawn ps = m_levelSpawns[m_level][i];
             QueuePonySpawn(ps.Start, ps.Diff, ps.Type);
         }
     }
@@ -178,10 +195,10 @@ public class GameBehaviour : MonoBehaviour
     {
         StartCoroutine(Wait.WaitThen(seconds, () =>
         {
-            // Handle the error checking inside the coroutine, in case of race conditions.
             if (m_inactiveEarls.Count == 0)
             {
-                Debug.LogError("No earls remaining!");
+                // ! This can happen when using the level cheat code.
+                Debug.LogWarning("No earls remaining!");
                 return;
             }
 
@@ -220,15 +237,41 @@ public class GameBehaviour : MonoBehaviour
     }
 
 
-    private void HandleVictory()
+    private void WinLevel()
     {
-        m_victoryPanel.SetActive(true);
-
-        // Update highest level beaten
-        if (SaveData.Instance.highestLevelBeaten < SaveData.Instance.levelSelected)
+        if (!GlobalBehaviour.Instance.Endless)
         {
-            SaveData.Instance.highestLevelBeaten = SaveData.Instance.levelSelected;
-            Saving.Save();
+            m_victoryPanel.SetActive(true);
+
+            // Update highest level beaten
+            if (SaveData.Instance.highestLevelBeaten < m_level)
+            {
+                SaveData.Instance.highestLevelBeaten = m_level;
+                Saving.Save();
+            }
+        }
+        else
+        {
+            // Either increment level, or go back to the first level of the triplet,
+            // making the difficulty harder instead.
+            if ((m_level + 1) % 3 == 0)
+            {
+                m_level -= 2;
+                
+                for (int l = 0; l < m_levelSpawns.Length; l++)
+                {
+                    for (int p = 0; p < m_levelSpawns[l].Length; p++)
+                    {
+                        m_levelSpawns[l][p].Diff = (WordDifficulty)Math.Min((int)WordDifficulty.FinalBoss, (int)m_levelSpawns[l][p].Diff + 1);
+                    }
+                }
+                m_difficultyBonus++;
+            }
+            else
+            {
+                m_level++;
+            }
+            StartLevel();
         }
     }
 }
