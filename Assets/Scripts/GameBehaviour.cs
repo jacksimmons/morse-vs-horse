@@ -48,7 +48,7 @@ public struct PonySpawn
 
 public class GameBehaviour : MonoBehaviour
 {
-    private PonySpawn[][] m_levelSpawns = new PonySpawn[][]
+    private readonly PonySpawn[][] m_startingLevelSpawns = new PonySpawn[][]
     {
         // Level 1
         new PonySpawn[]
@@ -84,6 +84,8 @@ public class GameBehaviour : MonoBehaviour
         }
     };
 
+    private PonySpawn[][] m_levelSpawns = new PonySpawn[3][];
+
     [SerializeField]
     private Image m_livesImage;
 
@@ -114,7 +116,10 @@ public class GameBehaviour : MonoBehaviour
     private bool m_checkNoMessagesLeft = false;
 
     private int m_level;
-    private int m_difficultyBonus;
+    private int m_totalLevel;
+
+    private readonly PonyType[] m_ponyTypes = (PonyType[])Enum.GetValues(typeof(PonyType));
+    private readonly WordDifficulty[] m_wordDiffs = (WordDifficulty[])Enum.GetValues(typeof(WordDifficulty));
 
 
     private void Start()
@@ -126,7 +131,9 @@ public class GameBehaviour : MonoBehaviour
             m_inactiveEarls.Add(city.GetComponentInChildren<EarlBehaviour>());
         }
 
+        Array.Copy(m_startingLevelSpawns, m_levelSpawns, m_startingLevelSpawns.Length);
         m_level = GlobalBehaviour.Instance.Level;
+        m_totalLevel = m_level;
         StartLevel();
     }
 
@@ -175,15 +182,13 @@ public class GameBehaviour : MonoBehaviour
 
     private void SpawnLevel()
     {
-        Debug.Assert(m_level < m_levelSpawns.Length, $"No level info for level {m_level}");
-        m_levelText.text = $"Level {m_level + 1}";
-
-        if (GlobalBehaviour.Instance.Endless) m_levelText.text += $" (Difficulty +{m_difficultyBonus})";
+        Debug.Assert(m_level < m_levelSpawns.Length, $"No level info for level {m_totalLevel}");
+        m_levelText.text = $"Level {m_totalLevel + 1}";
 
         for (int i = 0; i < m_levelSpawns[m_level].Length; i++)
         {
             PonySpawn ps = m_levelSpawns[m_level][i];
-            QueuePonySpawn(ps.Start, ps.Diff, ps.Type);
+            QueuePonySpawn(m_level, ps.Start, ps.Diff, ps.Type);
         }
     }
 
@@ -191,7 +196,7 @@ public class GameBehaviour : MonoBehaviour
     /// <summary>
     /// Queues a random pony spawn in the future (in `seconds` seconds).
     /// </summary>
-    private void QueuePonySpawn(float seconds, WordDifficulty diff, PonyType type)
+    private void QueuePonySpawn(int level, float seconds, WordDifficulty diff, PonyType type)
     {
         StartCoroutine(Wait.WaitThen(seconds, () =>
         {
@@ -199,6 +204,13 @@ public class GameBehaviour : MonoBehaviour
             {
                 // ! This can happen when using the level cheat code.
                 Debug.LogWarning("No earls remaining!");
+                return;
+            }
+
+            if (m_level > level)
+            {
+                // ! This can happen when using the level cheat code.
+                Debug.LogWarning("Word skipped!");
                 return;
             }
 
@@ -252,25 +264,18 @@ public class GameBehaviour : MonoBehaviour
         }
         else
         {
-            // Either increment level, or go back to the first level of the triplet,
-            // making the difficulty harder instead.
+            // If in the third level of the map, go back to the first.
             if ((m_level + 1) % 3 == 0)
             {
                 m_level -= 2;
-                
-                for (int l = 0; l < m_levelSpawns.Length; l++)
-                {
-                    for (int p = 0; p < m_levelSpawns[l].Length; p++)
-                    {
-                        m_levelSpawns[l][p].Diff = (WordDifficulty)Math.Min((int)WordDifficulty.FinalBoss, (int)m_levelSpawns[l][p].Diff + 1);
-                    }
-                }
-                m_difficultyBonus++;
             }
+            // Otherwise go to the next level.
             else
             {
                 m_level++;
             }
+
+            m_totalLevel++;
             StartLevel();
         }
     }

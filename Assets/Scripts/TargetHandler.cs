@@ -45,10 +45,14 @@ public class TargetHandler : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// Set the display text of the target morse string.
-    /// </summary>
-
+    private void Update()
+    {
+        // ! Debug cheats
+        if (Input.GetKeyDown(KeyCode.I) && Input.GetKey(KeyCode.B) && Input.GetKey(KeyCode.G) && m_targetPony)
+        {
+            CompleteTarget();
+        }
+    }
 
 
     public void SetPony(PonyBehaviour pony)
