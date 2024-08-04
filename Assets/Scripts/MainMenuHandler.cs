@@ -47,34 +47,18 @@ public class MainMenuHandler : MonoBehaviour
         ApplyVideoSettings();
 
         // Enable level select buttons for all beaten levels (and for the next level to beat)
-        for (int i = 0; i <= SaveData.Instance.highestLevelBeaten + 1 && i <= SaveData.HIGHEST_NORMAL_LEVEL; i++)
+        for (int i = 0; i <= SaveData.Instance.highestLevelBeaten + 1 && i <= SaveData.HIGHEST_LEVEL; i++)
         {
             Transform levelSelect = m_levelSelects[i / 3].transform.GetChild(i % 3);
-
             Button button = levelSelect.GetComponent<Button>();
             button.interactable = true;
-
+            
             // Avoid using iteration variable to define listener
             {
                 int j = i;
                 button.onClick.AddListener(() => OnLevelBtnClicked(j));
             }
 
-            levelSelect.Find("Locked").gameObject.SetActive(false);
-        }
-
-        int highestEndlessAccessible = (SaveData.Instance.highestLevelBeaten + 1)/ 3 - 1;
-        for (int i = 0; i <= highestEndlessAccessible; i++)
-        {
-            Transform levelSelect = m_levelSelects[i].transform.GetChild(3);
-
-            Button button = levelSelect.GetComponent<Button>();
-            button.interactable = true;
-            // Avoid using iteration variable to define listener
-            {
-                int j = i;
-                button.onClick.AddListener(() => OnEndlessBtnClicked(j));
-            }
             levelSelect.Find("Locked").gameObject.SetActive(false);
         }
     }
@@ -95,16 +79,7 @@ public class MainMenuHandler : MonoBehaviour
     public void OnLevelBtnClicked(int level)
     {
         SceneManager.LoadScene("Game");
-        GlobalBehaviour.Instance.Level = level;
-        GlobalBehaviour.Instance.Endless = false;
-    }
-
-
-    public void OnEndlessBtnClicked(int map)
-    {
-        SceneManager.LoadScene("Game");
-        GlobalBehaviour.Instance.Level = map * 3;
-        GlobalBehaviour.Instance.Endless = true;
+        SaveData.Instance.levelSelected = level;
     }
 
 

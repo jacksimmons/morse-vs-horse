@@ -35,7 +35,7 @@ public class EarlManager : MonoBehaviour
     {
         Messages = new(m_messages);
 
-        int map = GlobalBehaviour.Instance.Level / 3;
+        int map = SaveData.Instance.levelSelected / 3;
         s_allMessages = new()
         {
             { WordDifficulty.Easy, WordListFilenameToList($"Words/Map{map}/Easy") },

@@ -7,7 +7,7 @@ using UnityEngine;
 [Serializable]
 public class SaveData
 {
-    public const int HIGHEST_NORMAL_LEVEL = 2;
+    public const int HIGHEST_LEVEL = 2;
 
 
     private static SaveData m_inst;
@@ -25,6 +25,11 @@ public class SaveData
     public static void Reset() { m_inst = new(); }
 
 
+    /// <summary>
+    /// A questionable practice, where the last selected level (from main menu) is saved here.
+    /// </summary>
+    public int levelSelected = 0;
+
     public int highestLevelBeaten = -1;
     public bool fullscreen = false;
     public bool easyMode = false;
@@ -39,7 +44,7 @@ public class SaveData
     /// <summary>
     /// SFX volume, from 0 to 100.
     /// </summary>
-    public float sfxVolume = 25;
+    public float sfxVolume = 50;
 }
 
 
