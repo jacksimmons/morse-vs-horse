@@ -1,13 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
+// Sanitised 29/9/24
+
+/// <summary>
+/// Static class for handling operations related to aspect ratios.
+/// </summary>
 public static class AspectRatio
 {
     /// <summary>
-    /// 16:9
+    /// Gets an array of resolutions which are 16:9, and distinct enough - e.g. 1080p 59.4Hz and 1080 59.9Hz are not distinct enough.
+    /// The one which is added first remains and subsequent non-distinct resolutions are discarded, and displayed refresh rate is rounded up.
     /// </summary>
     public static Resolution[] GetSupportedResolutions()
     {
@@ -18,8 +22,7 @@ public static class AspectRatio
         Resolution firstRes = validAspectRatioResolutions[0];
         int prevW = firstRes.width, prevH = firstRes.height;
         int prevHz = Mathf.RoundToInt((float)firstRes.refreshRateRatio.value);
-
-        List<Resolution> validAndUniqueAspectRatioResolutions = new(validAspectRatioResolutions);
+        List<Resolution> uniqueRefreshRateAndValidAspectRatioResolutions = new(validAspectRatioResolutions);
         for (int i = 0; i < validAspectRatioResolutions.Count; i++)
         {
             int thisW, thisH;
@@ -33,15 +36,13 @@ public static class AspectRatio
 
             // Check if this resolution is "identical" to the previous
             if (thisW == prevW && thisH == prevH && thisHz == prevHz)
-            {
-                validAndUniqueAspectRatioResolutions.Remove(resolution);
-            }
+                uniqueRefreshRateAndValidAspectRatioResolutions.Remove(resolution);
 
-            // Update prev resolution stats
+            // Update previous markers
             prevW = thisW;
             prevH = thisH;
             prevHz = thisHz;
         }
-        return validAndUniqueAspectRatioResolutions.ToArray();
+        return uniqueRefreshRateAndValidAspectRatioResolutions.ToArray();
     }
 }

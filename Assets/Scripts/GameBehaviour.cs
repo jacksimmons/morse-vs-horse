@@ -10,18 +10,19 @@ using Random = UnityEngine.Random;
 /// Controls the rate of pony spawns & their difficulties.
 /// FNAF style: changable throughout the level to provide dynamic WordDifficulty.
 /// </summary>
-public enum GameDiff
-{
-    Easy,
-    Medium,
-    Hard
-}
+//public enum GameDiff
+//{
+//    Easy,
+//    Medium,
+//    Hard
+//}
 
 
 public enum WordDifficulty
 {
     Easy,
-    Medium,
+    QuiteEasy,
+    Intermediate,
     Hard,
     Boss
 }
@@ -38,7 +39,7 @@ public enum PonyType
 
 public struct PonySpawn
 {
-    public int Start { get; set; }
+    public int Wait { get; set; }
     public WordDifficulty Diff { get; set; }
     public PonyType Type { get; set; }
 }
@@ -46,42 +47,6 @@ public struct PonySpawn
 
 public class GameBehaviour : MonoBehaviour
 {
-    private readonly static PonySpawn[][] m_levelSpawns = new PonySpawn[][]
-    {
-        // Level 1
-        new PonySpawn[]
-        {
-            new() { Start = 1, Diff = WordDifficulty.Easy, Type = PonyType.Pony },
-            new() { Start = 12, Diff = WordDifficulty.Easy, Type = PonyType.Pony },
-            new() { Start = 24, Diff = WordDifficulty.Easy, Type = PonyType.Pony },
-            new() { Start = 36, Diff = WordDifficulty.Easy, Type = PonyType.Pony },
-            new() { Start = 48, Diff = WordDifficulty.Easy, Type = PonyType.Pony }
-        },
-
-        // Level 2
-        new PonySpawn[]
-        {
-            new() { Start = 1, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
-            new() { Start = 12, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
-            new() { Start = 24, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
-            new() { Start = 36, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
-            new() { Start = 48, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
-            new() { Start = 60, Diff = WordDifficulty.Hard, Type = PonyType.Pony }
-        },
-
-        // Level 3
-        new PonySpawn[]
-        {
-            new() { Start = 1, Diff = WordDifficulty.Hard, Type = PonyType.Pony },
-            new() { Start = 12, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
-            new() { Start = 24, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
-            new() { Start = 36, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
-            new() { Start = 48, Diff = WordDifficulty.Medium, Type = PonyType.Pony },
-            new() { Start = 60, Diff = WordDifficulty.Hard, Type = PonyType.Pony },
-            new() { Start = 90, Diff = WordDifficulty.Boss, Type = PonyType.Person },
-        }
-    };
-
     [SerializeField]
     private Image m_livesImage;
 
@@ -94,6 +59,8 @@ public class GameBehaviour : MonoBehaviour
     private Sprite[] m_livesLostSprites;
     private int m_livesLost = 0;
 
+    private int m_poniesGone = 0;
+
     [SerializeField]
     private GameObject m_gameOverPanel;
     [SerializeField]
@@ -103,13 +70,11 @@ public class GameBehaviour : MonoBehaviour
 
     [SerializeField]
     private GameObject m_cities;
-    private List<EarlBehaviour> m_inactiveEarls = new();
-    private List<EarlBehaviour> m_activeEarls = new();
+    private List<CityMessageBehaviour> m_inactiveEarls = new();
+    private List<CityMessageBehaviour> m_activeEarls = new();
 
     [SerializeField]
     private AudioSource m_ponySfx;
-
-    private bool m_checkNoMessagesLeft = false;
 
 
     private void Start()
@@ -118,35 +83,29 @@ public class GameBehaviour : MonoBehaviour
 
         foreach (Transform city in m_cities.transform)
         {
-            m_inactiveEarls.Add(city.GetComponentInChildren<EarlBehaviour>());
+            m_inactiveEarls.Add(city.GetComponentInChildren<CityMessageBehaviour>());
         }
 
-        // Easy takes ~20s so spawn every 15s
         SpawnLevel();
-
-        // Activate victory check after all ponies have spawned
-        StartCoroutine(Wait.WaitThen(40, () => m_checkNoMessagesLeft = true));
     }
 
 
     private void Update()
     {
         // Handle moving active earls to inactive so they can be reused.
-        List<EarlBehaviour> activeEarlsTemp = new(m_activeEarls);
-        foreach (EarlBehaviour earl in activeEarlsTemp)
+        List<CityMessageBehaviour> activeEarlsTemp = new(m_activeEarls);
+        foreach (CityMessageBehaviour earl in activeEarlsTemp)
         {
-            if (!earl.Pony.PonyActive && !earl.EarlActive)
+            if (!earl.Pony.PonyActive && !earl.Active)
             {
                 m_activeEarls.Remove(earl);
                 m_inactiveEarls.Add(earl);
-            }
-        }
+                m_poniesGone++;
 
-        if (m_checkNoMessagesLeft)
-        {
-            if (m_activeEarls.Count == 0)
-            {
-                HandleVictory();
+                if (m_poniesGone == Levels.AllLevels[Levels.SelectedLevel].Spawns.Length)
+                {
+                    HandleVictory();
+                }
             }
         }
 
@@ -160,13 +119,24 @@ public class GameBehaviour : MonoBehaviour
 
     private void SpawnLevel()
     {
-        Debug.Assert(SaveData.Instance.levelSelected < m_levelSpawns.Length, $"No level info for level {SaveData.Instance.levelSelected}");
-        m_levelText.text = $"Level {SaveData.Instance.levelSelected + 1}";
+        int level = SaveData.Instance.levelSelected;
 
-        for (int i = 0; i < m_levelSpawns[SaveData.Instance.levelSelected].Length; i++)
+        Debug.Assert(level < Levels.AllLevels.Length, $"No level info for level {level}");
+
+        // Add level info UI
+        m_levelText.text = $"Level {level + 1}";
+        foreach (Level.Mod mod in Levels.AllLevels[level].Mods)
         {
-            PonySpawn ps = m_levelSpawns[SaveData.Instance.levelSelected][i];
-            QueuePonySpawn(ps.Start, ps.Diff, ps.Type);
+            m_levelText.text += $"\n{mod.Name}";
+        }
+
+        int start = 0;
+        for (int i = 0; i < Levels.AllLevels[SaveData.Instance.levelSelected].Spawns.Length; i++)
+        {
+            PonySpawn ps = Levels.AllLevels[SaveData.Instance.levelSelected].Spawns[i];
+            start += ps.Wait;
+
+            QueuePonySpawn(start, ps.Diff, ps.Type);
         }
     }
 
@@ -186,7 +156,7 @@ public class GameBehaviour : MonoBehaviour
             }
 
             // Choose a random inactive city to send a message.
-            EarlBehaviour earl = m_inactiveEarls[Random.Range(0, m_inactiveEarls.Count)];
+            CityMessageBehaviour earl = m_inactiveEarls[Random.Range(0, m_inactiveEarls.Count)];
 
             // Activate the pony and earl UI.
             earl.ActivateEarl(diff, type);
@@ -224,11 +194,17 @@ public class GameBehaviour : MonoBehaviour
     {
         m_victoryPanel.SetActive(true);
 
-        // Update highest level beaten
-        if (SaveData.Instance.highestLevelBeaten < SaveData.Instance.levelSelected)
+        // Update highest level beaten, if it has increased.
+        // Also set any relevant achievements.
+        if (SaveData.Instance.highestLevelBeaten < Levels.SelectedLevel)
         {
-            SaveData.Instance.highestLevelBeaten = SaveData.Instance.levelSelected;
+            SaveData.Instance.highestLevelBeaten = Levels.SelectedLevel;
             Saving.Save();
+
+            if (SaveData.Instance.highestLevelBeaten >= 8)
+            {
+                Achievement.GiveAchievement("BEAT_LV_IX");
+            }
         }
     }
 }

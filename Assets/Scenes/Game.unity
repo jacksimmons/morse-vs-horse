@@ -7273,7 +7273,7 @@ GameObject:
   - component: {fileID: 1902174169}
   - component: {fileID: 1902174168}
   m_Layer: 0
-  m_Name: Paths
+  m_Name: Edges
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

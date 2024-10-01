@@ -8,7 +8,7 @@ public class InputHandler : MonoBehaviour
     [SerializeField]
     private TMP_Text m_inputText;
     [SerializeField]
-    private EarlManager m_earlManager;
+    private CityMessageManager m_earlManager;
     [SerializeField]
     private TargetHandler m_targetHandler;
 
@@ -184,7 +184,7 @@ public class InputHandler : MonoBehaviour
     /// </summary>
     public void CycleLookupTableIndex()
     {
-        SetLookupTableIndex(ArrayTools.CircularNextIndex(m_lookupTablePageIndex, m_lookupTablePages.Length, true));
+        SetLookupTableIndex(m_lookupTablePages.CircularNextIndex(m_lookupTablePageIndex, true));
     }
 
 

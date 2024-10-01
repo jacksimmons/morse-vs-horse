@@ -89,7 +89,7 @@ GameObject:
   - component: {fileID: 2196400638819999094}
   - component: {fileID: 5249847715238187778}
   m_Layer: 0
-  m_Name: Earl
+  m_Name: Message
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -164,9 +164,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62b6602f7db155346a124ac5e9bed248, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_city: {fileID: 3927709640630381119}
   m_pony: {fileID: 7215934821201367897}
-  m_glow: {fileID: 5002714664459854502}
   m_scroll: {fileID: 731164879299903823}
+  m_glow: {fileID: 5002714664459854502}
 --- !u!114 &5249847715238187778
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -543,7 +544,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d92bbac08d0f79643a839141f487099c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_earl: {fileID: 0}
+  m_message: {fileID: 2196400638819999094}
 --- !u!1 &8369085833318150974
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,6 +9,13 @@ using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 
+/// <summary>
+/// Class representing a pony delivering a message.
+/// </summary>
+/// <remarks>
+/// Each pony belongs wholly to a message object, and is activated when its message
+/// is activated.
+/// </remarks>
 public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     /// <summary>
@@ -39,7 +46,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         private float m_timerElapsed;
 
 
-        public Pony(PonyType type, PonyBehaviour pony, Path path)
+        public Pony(PonyType type, PonyBehaviour pony, Edge path)
         {
             m_speed = 5 + 3 * (int)type;
             m_pony = pony;
@@ -145,16 +152,15 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// </summary>
     public bool PonyActive { get; private set; } = false;
 
-    private List<PathBehaviour> m_ponyPaths;
+    private List<EdgeBehaviour> m_ponyPaths;
 
     [SerializeField]
-    private EarlBehaviour m_earl;
+    private CityMessageBehaviour m_message;
 
 
     private void Start()
     {
         m_gb = GameObject.FindWithTag("GameController").GetComponent<GameBehaviour>();
-        m_earl = transform.parent.Find("Earl").GetComponent<EarlBehaviour>();
     }
 
 
@@ -177,14 +183,14 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         Debug.Assert(cityDist < GameObject.Find("Cities").transform.childCount);
 
         // Recursively, randomly generate pony journey.
-        Path journey = RandomlyGeneratePath(cityDist, new List<CityBehaviour> { startCity }, null);
+        Edge journey = RandomlyGeneratePath(cityDist, new List<CityBehaviour> { startCity }, null);
 
-        // Calculate which paths are contained entirely by the pony path.
+        // Calculate which edges are contained entirely by the pony path.
         m_ponyPaths = new();
-        Transform pathTransforms = GameObject.Find("Paths").transform;
-        foreach (Transform pathTransform in pathTransforms)
+        Transform edgeTransforms = GameObject.Find("Edges").transform;
+        foreach (Transform edgeTransform in edgeTransforms)
         {
-            PathBehaviour pb = pathTransform.GetComponent<PathBehaviour>();
+            EdgeBehaviour pb = edgeTransform.GetComponent<EdgeBehaviour>();
             Vector2[] pbPathPts = pb.Points.ToArray();
 
             // Check path completely contains pb's points.
@@ -206,7 +212,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// if the path reaches a leaf node early. This is fine as the pony will just move slower.
     /// </param>
     /// <param name="visited">A record of all visited cities.</param>
-    private Path RandomlyGeneratePath(int dist, List<CityBehaviour> visited, Path genPath)
+    private Edge RandomlyGeneratePath(int dist, List<CityBehaviour> visited, Edge genPath)
     {
         // Base case.
         if (dist == 0) return genPath;
@@ -215,8 +221,8 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         CityBehaviour city = visited[^1];
 
         // Cannot travel to/from city already travelled to in visited.
-        List<Path> paths = new(city.AdjacentPaths);
-        foreach (Path path in city.AdjacentPaths)
+        List<Edge> paths = new(city.OutboundEdges);
+        foreach (Edge path in city.OutboundEdges)
         {
             if (visited.Contains(path.To)) paths.Remove(path);
         }
@@ -224,8 +230,8 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         // Pick random next city. Add points from the travelled path and add the city to visited.
         if (paths.Count > 0)
         {
-            Path ext = paths[Random.Range(0, paths.Count)];
-            genPath = (genPath == null ? ext : Path.Extend(genPath, ext));
+            Edge ext = paths[Random.Range(0, paths.Count)];
+            genPath = (genPath == null ? ext : Edge.Extend(genPath, ext));
             visited.Add(ext.To);
             return RandomlyGeneratePath(dist - 1, visited, genPath);
         }
@@ -249,7 +255,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     private void OnGoalReached()
     {
-        m_gb.LoseLife(EarlBehaviour.Manager.Messages[m_earl.Index]);
+        m_gb.LoseLife(CityMessageBehaviour.Manager.ActiveMessages[m_message.Index]);
         Explode();
     }
 

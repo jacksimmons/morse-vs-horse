@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿// Sanitised 29/9/24
+
+/// <summary>
 /// An extension class for arrays.
 /// </summary>
 public static class ArrayTools
@@ -7,7 +9,7 @@ public static class ArrayTools
     /// A greedy insert which moves all elements after, one place closer to the end.
     /// Deletes the final element entirely.
     /// </summary>
-    public static void Insert<T>(T[] array, T toAdd, int index)
+    public static void Insert<T>(this T[] array, T toAdd, int index)
     {
         // Insert the element
         T next = array[index];
@@ -29,9 +31,9 @@ public static class ArrayTools
     /// <summary>
     /// Gets and returns the next element of an arbitrary array in a circular array fashion.
     /// </summary>
-    public static T CircularNextElement<T>(T[] arr, int current, bool right)
+    public static T CircularNextElement<T>(this T[] arr, int current, bool right)
     {
-        return arr[CircularNextIndex(current, arr.Length, right)];
+        return arr[CircularNextIndex(arr, current, right)];
     }
 
 
@@ -41,20 +43,19 @@ public static class ArrayTools
     /// Likewise, if provided index is 0, it returns {length - 1} (if going left).
     /// </summary>
     /// <param name="current">The current index to go left/right from.</param>
-    /// <param name="length">The length of the array in question.</param>
     /// <param name="right">If `true`, goes right (clockwise) around the array, otherwise goes left (anti-cw).</param>
     /// <returns>The next index.</returns>
-    public static int CircularNextIndex(int current, int length, bool right)
+    public static int CircularNextIndex<T>(this T[] arr, int current, bool right)
     {
         if (right)
         {
             // Going right
-            if (current + 1 >= length) return 0;
+            if (current + 1 >= arr.Length) return 0;
             return current + 1;
         }
 
         // Going left
-        if (current - 1 < 0) return length - 1;
+        if (current - 1 < 0) return arr.Length - 1;
         return current - 1;
     }
 }

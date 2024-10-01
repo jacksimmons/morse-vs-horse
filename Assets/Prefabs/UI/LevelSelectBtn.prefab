@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Level 1
+  m_text: II
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -169,7 +169,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0.4236, y: -0.0209}
-  m_SizeDelta: {x: 99, y: 24}
+  m_SizeDelta: {x: 19, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1571003819978172238
 CanvasRenderer:
@@ -221,6 +221,7 @@ GameObject:
   - component: {fileID: 6758592903950996896}
   - component: {fileID: 4519975034776838720}
   - component: {fileID: 2489969805186265916}
+  - component: {fileID: 5259022226040741008}
   m_Layer: 5
   m_Name: LevelSelectBtn
   m_TagString: Untagged
@@ -246,8 +247,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -150.8949, y: -12.915}
-  m_SizeDelta: {x: 100.2115, y: 25.831}
+  m_AnchoredPosition: {x: -189.7829, y: -12.914993}
+  m_SizeDelta: {x: 22.4354, y: 25.831}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6758592903950996896
 CanvasRenderer:
@@ -326,7 +327,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 4519975034776838720}
   m_OnClick:
     m_PersistentCalls:
@@ -343,3 +344,19 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &5259022226040741008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5656596856961500229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37121e3c51bd3c74fba683cdf50a39db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_btn: {fileID: 2489969805186265916}
+  m_text: {fileID: 4785331150132336469}
+  m_locked: {fileID: 3071919997404530070}
+  m_endlessLevel: -1

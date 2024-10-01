@@ -8,6 +8,7 @@ using UnityEngine;
 public class SaveData
 {
     public const int HIGHEST_LEVEL = 2;
+    public const int ENDLESS_FLAG = 100;
 
 
     private static SaveData m_inst;
@@ -26,7 +27,7 @@ public class SaveData
 
 
     /// <summary>
-    /// A questionable practice, where the last selected level (from main menu) is saved here.
+    /// ? questionable practice, where the last selected level (from main menu) is saved here.
     /// </summary>
     public int levelSelected = 0;
 

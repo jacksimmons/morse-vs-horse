@@ -1,3 +1,5 @@
+using Steamworks;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -17,14 +19,7 @@ public class MainMenuHandler : MonoBehaviour
     [SerializeField]
     private Slider m_sfxVolume;
 
-    /// <summary>
-    /// The level select for each map (each map has 3 levels).
-    /// </summary>
-    [SerializeField]
-    private GameObject[] m_levelSelects;
-
     private List<Resolution> m_supportedResolutions;
-
 
     private void Start()
     {
@@ -45,22 +40,6 @@ public class MainMenuHandler : MonoBehaviour
 
         // Apply existing resolution and fullscreen settings
         ApplyVideoSettings();
-
-        // Enable level select buttons for all beaten levels (and for the next level to beat)
-        for (int i = 0; i <= SaveData.Instance.highestLevelBeaten + 1 && i <= SaveData.HIGHEST_LEVEL; i++)
-        {
-            Transform levelSelect = m_levelSelects[i / 3].transform.GetChild(i % 3);
-            Button button = levelSelect.GetComponent<Button>();
-            button.interactable = true;
-            
-            // Avoid using iteration variable to define listener
-            {
-                int j = i;
-                button.onClick.AddListener(() => OnLevelBtnClicked(j));
-            }
-
-            levelSelect.Find("Locked").gameObject.SetActive(false);
-        }
     }
 
 
@@ -73,13 +52,6 @@ public class MainMenuHandler : MonoBehaviour
             Saving.Save();
             SceneManager.LoadScene("Main");
         }
-    }
-
-
-    public void OnLevelBtnClicked(int level)
-    {
-        SceneManager.LoadScene("Game");
-        SaveData.Instance.levelSelected = level;
     }
 
 
@@ -103,7 +75,7 @@ public class MainMenuHandler : MonoBehaviour
         int resIndex = m_supportedResolutions.IndexOf(SaveData.Instance.resolution);
         Debug.Assert(resIndex != -1, "Previous resolution is unsupported.");
 
-        resIndex = ArrayTools.CircularNextIndex(resIndex, m_supportedResolutions.Count, right);
+        resIndex = m_supportedResolutions.ToArray().CircularNextIndex(resIndex, right);
         print(resIndex);
 
         SaveData.Instance.resolution = m_supportedResolutions[resIndex];

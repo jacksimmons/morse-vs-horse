@@ -67,6 +67,6 @@ public class TargetHandler : MonoBehaviour
         m_targetPony.Explode();
         m_targetPony = null;
         Target = "";
-        GetComponent<EarlManager>().CurrentMorseTarget = null;
+        GetComponent<CityMessageManager>().CurrentMorseTarget = null;
     }
 }
