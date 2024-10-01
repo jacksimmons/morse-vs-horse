@@ -24,7 +24,8 @@ public enum WordDifficulty
     QuiteEasy,
     Intermediate,
     Hard,
-    Boss
+    Boss,
+    Supercalifragilisticexpialidocious
 }
 
 

@@ -31,7 +31,7 @@ public static class Levels
         // Lv3
         new(
         new PonySpawn[] {
-            new() { Wait = 1, Diff = WordDifficulty.Hard, Type = PonyType.Person },
+            new() { Wait = 1, Diff = WordDifficulty.Hard, Type = PonyType.Boss },
             new() { Wait = 12, Diff = WordDifficulty.Easy, Type = PonyType.Person },
             new() { Wait = 12, Diff = WordDifficulty.Easy, Type = PonyType.Person }
         },
@@ -41,8 +41,7 @@ public static class Levels
         }),
 
         // Lv4
-        new(
-        new PonySpawn[] {
+        new(new PonySpawn[] {
             new() { Wait = 1, Diff = WordDifficulty.Easy, Type = PonyType.Pony },
             new() { Wait = 12, Diff = WordDifficulty.QuiteEasy, Type = PonyType.Person },
             new() { Wait = 13, Diff = WordDifficulty.Easy, Type = PonyType.Pony },
@@ -51,18 +50,20 @@ public static class Levels
         }),
 
         // Lv5
-        new(
-        new PonySpawn[] {
+        new(new PonySpawn[] {
             new() { Wait = 1, Diff = WordDifficulty.QuiteEasy, Type = PonyType.Pony },
             new() { Wait = 14, Diff = WordDifficulty.Easy, Type = PonyType.Pony },
             new() { Wait = 13, Diff = WordDifficulty.Intermediate, Type = PonyType.Person },
             new() { Wait = 14, Diff = WordDifficulty.Easy, Type = PonyType.Pony },
-            new() { Wait = 13, Diff = WordDifficulty.QuiteEasy, Type = PonyType.Pony }
+            new() { Wait = 13, Diff = WordDifficulty.Supercalifragilisticexpialidocious, Type = PonyType.Boss }
+        },
+
+        new Level.Mod[] {
+            new() { Name = "Message for Big Boris" }
         }),
 
         // Lv6
-        new(
-        new PonySpawn[] {
+        new(new PonySpawn[] {
             new() { Wait = 1, Diff = WordDifficulty.Easy, Type = PonyType.Person },
             new() { Wait = 1, Diff = WordDifficulty.Easy, Type = PonyType.Person },
             new() { Wait = 1, Diff = WordDifficulty.Easy, Type = PonyType.Person },
@@ -75,8 +76,7 @@ public static class Levels
         }),
 
         // Lv7
-        new(
-        new PonySpawn[] {
+        new(new PonySpawn[] {
             new() { Wait = 1, Diff = WordDifficulty.QuiteEasy, Type = PonyType.Pony },
             new() { Wait = 14, Diff = WordDifficulty.Easy, Type = PonyType.Pony },
             new() { Wait = 13, Diff = WordDifficulty.Intermediate, Type = PonyType.Person },
@@ -85,8 +85,7 @@ public static class Levels
         }),
 
         // Lv8
-        new(
-        new PonySpawn[] {
+        new(new PonySpawn[] {
             new() { Wait = 1, Diff = WordDifficulty.Intermediate, Type = PonyType.Person },
             new() { Wait = 14, Diff = WordDifficulty.QuiteEasy, Type = PonyType.Pony },
             new() { Wait = 14, Diff = WordDifficulty.QuiteEasy, Type = PonyType.Pony },
@@ -95,8 +94,7 @@ public static class Levels
         }),
 
         // Lv9
-        new(
-        new PonySpawn[] {
+        new(new PonySpawn[] {
             new() { Wait = 1, Diff = WordDifficulty.Boss, Type = PonyType.Boss },
             new() { Wait = 14, Diff = WordDifficulty.QuiteEasy, Type = PonyType.Pony },
             new() { Wait = 14, Diff = WordDifficulty.QuiteEasy, Type = PonyType.Pony },

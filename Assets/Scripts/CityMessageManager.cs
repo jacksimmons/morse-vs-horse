@@ -36,7 +36,8 @@ public class CityMessageManager : MonoBehaviour
             { WordDifficulty.QuiteEasy, Init_WordFileToList($"Words/Map{map}/Diff1") },
             { WordDifficulty.Intermediate, Init_WordFileToList($"Words/Map{map}/Diff2") },
             { WordDifficulty.Hard, Init_WordFileToList($"Words/Map{map}/Diff3") },
-            { WordDifficulty.Boss, Init_WordFileToList($"Words/Map{map}/Diff4") }
+            { WordDifficulty.Boss, Init_WordFileToList($"Words/Map{map}/Diff4") },
+            { WordDifficulty.Supercalifragilisticexpialidocious, Init_WordFileToList($"Words/Map{map}/Diff5") }
         };
         AllMessages = new(m_allMessages);
     }
