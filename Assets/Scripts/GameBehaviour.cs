@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,36 +15,8 @@ using Random = UnityEngine.Random;
 //{
 //    Easy,
 //    Medium,
-//    Hard
+//    VeryHard
 //}
-
-
-public enum WordDifficulty
-{
-    Easy,
-    QuiteEasy,
-    Intermediate,
-    Hard,
-    Boss,
-    Supercalifragilisticexpialidocious
-}
-
-
-public enum PonyType
-{
-    Boss,
-    Person,
-    Pony,
-    Train
-}
-
-
-public struct PonySpawn
-{
-    public int Wait { get; set; }
-    public WordDifficulty Diff { get; set; }
-    public PonyType Type { get; set; }
-}
 
 
 public class GameBehaviour : MonoBehaviour
@@ -71,8 +44,8 @@ public class GameBehaviour : MonoBehaviour
 
     [SerializeField]
     private GameObject m_cities;
-    private List<CityMessageBehaviour> m_inactiveEarls = new();
-    private List<CityMessageBehaviour> m_activeEarls = new();
+    private List<CityMessageBehaviour> m_inactiveMessages = new();
+    private List<CityMessageBehaviour> m_activeMessages = new();
 
     [SerializeField]
     private AudioSource m_ponySfx;
@@ -84,7 +57,7 @@ public class GameBehaviour : MonoBehaviour
 
         foreach (Transform city in m_cities.transform)
         {
-            m_inactiveEarls.Add(city.GetComponentInChildren<CityMessageBehaviour>());
+            m_inactiveMessages.Add(city.GetComponentInChildren<CityMessageBehaviour>());
         }
 
         SpawnLevel();
@@ -93,17 +66,21 @@ public class GameBehaviour : MonoBehaviour
 
     private void Update()
     {
+        Level level = Levels.AllLevels[Levels.SelectedLevel];
+
         // Handle moving active earls to inactive so they can be reused.
-        List<CityMessageBehaviour> activeEarlsTemp = new(m_activeEarls);
+        List<CityMessageBehaviour> activeEarlsTemp = new(m_activeMessages);
         foreach (CityMessageBehaviour earl in activeEarlsTemp)
         {
-            if (!earl.Pony.PonyActive && !earl.Active)
+            if (!earl.Messenger.MessengerActive && !earl.Active)
             {
-                m_activeEarls.Remove(earl);
-                m_inactiveEarls.Add(earl);
+                m_activeMessages.Remove(earl);
+                m_inactiveMessages.Add(earl);
                 m_poniesGone++;
 
-                if (m_poniesGone == Levels.AllLevels[Levels.SelectedLevel].Spawns.Length)
+                // If all messengers have come and gone, and you are still alive, then you have won.
+                // If endless mode is selected, obviously this is not the case.
+                if (!SaveData.Instance.endlessSelected && m_poniesGone == Levels.AllLevels[Levels.SelectedLevel].Spawns.Count)
                 {
                     HandleVictory();
                 }
@@ -120,51 +97,54 @@ public class GameBehaviour : MonoBehaviour
 
     private void SpawnLevel()
     {
-        int level = SaveData.Instance.levelSelected;
-
-        Debug.Assert(level < Levels.AllLevels.Length, $"No level info for level {level}");
+        // Get level
+        int levelIndex = SaveData.Instance.levelSelected;
+        Level level = Levels.AllLevels[levelIndex];
 
         // Add level info UI
-        m_levelText.text = $"Level {level + 1}";
-        foreach (Level.Mod mod in Levels.AllLevels[level].Mods)
+        m_levelText.text = SaveData.Instance.endlessSelected
+            ? "Endless"
+            : $"Level {levelIndex + 1}\n{level.Name}";
+
+        // Make the level endless if necessary
+        if (SaveData.Instance.endlessSelected)
         {
-            m_levelText.text += $"\n{mod.Name}";
+            level = new EndlessLevel(level.Spawns.ToArray());
         }
 
-        int start = 0;
-        for (int i = 0; i < Levels.AllLevels[SaveData.Instance.levelSelected].Spawns.Length; i++)
+        // Callback which the level executes to activate each spawn
+        Action<float, SpawnDifficulty> callback =
+        (float secs, SpawnDifficulty diff) =>
         {
-            PonySpawn ps = Levels.AllLevels[SaveData.Instance.levelSelected].Spawns[i];
-            start += ps.Wait;
-
-            QueuePonySpawn(start, ps.Diff, ps.Type);
-        }
+            QueueMessengerSpawn(secs, diff);
+        };
+        level.Start(callback);
     }
 
 
     /// <summary>
-    /// Queues a random pony spawn in the future (in `seconds` seconds).
+    /// Queues a messenger spawn in the future, with a generated phrase (in `wait` seconds).
     /// </summary>
-    private void QueuePonySpawn(float seconds, WordDifficulty diff, PonyType type)
+    private void QueueMessengerSpawn(float wait, SpawnDifficulty diff)
     {
-        StartCoroutine(Wait.WaitThen(seconds, () =>
+        StartCoroutine(Wait.WaitThen(wait, () =>
         {
             // Handle the error checking inside the coroutine, in case of race conditions.
-            if (m_inactiveEarls.Count == 0)
+            if (m_inactiveMessages.Count == 0)
             {
                 Debug.LogError("No earls remaining!");
                 return;
             }
 
             // Choose a random inactive city to send a message.
-            CityMessageBehaviour earl = m_inactiveEarls[Random.Range(0, m_inactiveEarls.Count)];
+            CityMessageBehaviour cmb = m_inactiveMessages[Random.Range(0, m_inactiveMessages.Count)];
 
             // Activate the pony and earl UI.
-            earl.ActivateEarl(diff, type);
+            cmb.ActivateMessage(diff);
 
-            // Move the earl to active earls.
-            m_inactiveEarls.Remove(earl);
-            m_activeEarls.Add(earl);
+            // Set the city's message to active.
+            m_inactiveMessages.Remove(cmb);
+            m_activeMessages.Add(cmb);
             m_ponySfx.Play();
         }));
     }
@@ -194,6 +174,7 @@ public class GameBehaviour : MonoBehaviour
     private void HandleVictory()
     {
         m_victoryPanel.SetActive(true);
+        int completionRank = 3 - m_livesLost;
 
         // Update highest level beaten, if it has increased.
         // Also set any relevant achievements.
@@ -206,6 +187,11 @@ public class GameBehaviour : MonoBehaviour
             {
                 Achievement.GiveAchievement("BEAT_LV_IX");
             }
+        }
+
+        // Update the completion rank (1-star, 2-star, 3-star) if improved upon.
+        if (SaveData.Instance.completionRanks[Levels.SelectedLevel] < completionRank)
+        {
         }
     }
 }

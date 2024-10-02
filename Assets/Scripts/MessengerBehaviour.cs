@@ -8,13 +8,13 @@ using Random = UnityEngine.Random;
 
 
 /// <summary>
-/// Class representing a pony delivering a message.
+/// Class representing a messenger.
 /// </summary>
 /// <remarks>
-/// Each pony belongs wholly to a message object, and is activated when its message
+/// It belongs wholly to its CityMessageBehaviour, and is activated when that
 /// is activated.
 /// </remarks>
-public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class MessengerBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     /// <summary>
     /// A connection between two path points (finer than city connections).
@@ -26,13 +26,13 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         public Vector2 End { get; set; }
     }
 
-    private class Pony
+    private class Messenger
     {
-        private readonly PonyBehaviour m_pony;
-        private readonly Image m_ponyImage;
-        private readonly TMP_Text m_ponyTimer;
+        private readonly MessengerBehaviour m_mb;
+        private readonly Image m_image;
+        private readonly TMP_Text m_timer;
 
-        private PathEdge[] m_path;
+        private readonly PathEdge[] m_path;
         private PathEdge m_currentEdge;
         private int m_currentEdgeIndex;
 
@@ -44,12 +44,12 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         private float m_timerElapsed;
 
 
-        public Pony(PonyType type, PonyBehaviour pony, Edge path)
+        public Messenger(MessengerType type, MessengerBehaviour mb, Edge path)
         {
             m_speed = 5 + 3 * (int)type;
-            m_pony = pony;
-            m_ponyImage = pony.GetComponentInChildren<Image>();
-            m_ponyTimer = pony.GetComponentInChildren<TMP_Text>();
+            m_mb = mb;
+            m_image = m_mb.GetComponentInChildren<Image>();
+            m_timer = m_mb.GetComponentInChildren<TMP_Text>();
 
             // Calculate total path length (and number of edges in path)
             float totalDist = 0;
@@ -82,7 +82,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
         public void Step(float dt)
         {
-            // Linearly interpolate pony pos over the path edge
+            // Linearly interpolate pos over the path edge
             float t = m_currentEdgeTimerElapsed / m_currentEdgeTimerTotal;
 
             // If the edge destination has been reached...
@@ -96,7 +96,7 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
                 // Else the entire path has been completed, and the player loses a life.
                 else
                 {
-                    m_pony.OnGoalReached();
+                    m_mb.OnGoalReached();
                 }
             }
             else
@@ -106,15 +106,15 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
                 m_timerElapsed += dt;
 
                 // Update timer UI (rounded down to seconds)
-                m_ponyTimer.text = $"{(m_timerTotal - m_timerElapsed):F2}s";
+                m_timer.text = $"{(m_timerTotal - m_timerElapsed):F2}s";
 
-                // Move the pony along the edge
-                RectTransform rt = m_pony.GetComponent<RectTransform>();
+                // Move the messenger along the edge
+                RectTransform rt = m_mb.GetComponent<RectTransform>();
                 rt.anchoredPosition = Vector2.MoveTowards(rt.anchoredPosition, m_currentEdge.End, m_speed * dt);
             }
 
-            // Enable the pony image once it has been moved to its starting point
-            m_ponyImage.enabled = true;
+            // Enable the image once it has been moved to its starting point
+            m_image.enabled = true;
         }
 
         private void SetEdge(int edgeIndex)
@@ -129,28 +129,28 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             Vector2 edgePos = m_currentEdge.Start;
             Vector2 nextEdgePos = m_currentEdge.End;
 
-            // If this edge makes the pony go left, flip the sprite
-            Vector3 prevScale = m_ponyImage.transform.localScale;
+            // If this edge makes the messenger go left, flip the sprite
+            Vector3 prevScale = m_image.transform.localScale;
             float prevXScaleSize = Mathf.Abs(prevScale.x);
             if ((nextEdgePos - edgePos).x < 0)
-                m_ponyImage.transform.localScale = new Vector3(-prevXScaleSize, prevScale.y, prevScale.z);
+                m_image.transform.localScale = new Vector3(-prevXScaleSize, prevScale.y, prevScale.z);
             else
-                m_ponyImage.transform.localScale = new Vector3(prevXScaleSize, prevScale.y, prevScale.z);
+                m_image.transform.localScale = new Vector3(prevXScaleSize, prevScale.y, prevScale.z);
 
-            // Ensure pony position is correct at the start of an edge.
-            m_pony.GetComponent<RectTransform>().anchoredPosition = m_currentEdge.Start;
+            // Ensure position is correct at the start of an edge.
+            m_mb.GetComponent<RectTransform>().anchoredPosition = m_currentEdge.Start;
         }
     }
 
     private GameBehaviour m_gb;
-    private Pony m_pony = null;
+    private Messenger m_messenger = null;
 
     /// <summary>
-    /// Has the pony begun moving?
+    /// Has the messenger begun moving?
     /// </summary>
-    public bool PonyActive { get; private set; } = false;
+    public bool MessengerActive { get; private set; } = false;
 
-    private List<EdgeBehaviour> m_ponyPaths;
+    private List<EdgeBehaviour> m_messengerEdges;
 
     [SerializeField]
     private CityMessageBehaviour m_message;
@@ -164,50 +164,50 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     private void Update()
     {
-        m_pony?.Step(Time.deltaTime);
+        m_messenger?.Step(Time.deltaTime);
     }
 
 
     /// <summary>
-    /// Activates the pony express, and sets it off on its journey to the destination city.
+    /// Activates the messenger, and sets it off on its journey to the destination city.
     /// </summary>
-    /// <param name="type">Type of the pony (person/pony/train/...).
-    /// <param name="startCity">The city the pony starts at.</param>
-    /// <param name="cityDist">The number of cities the pony travels to.</param>
-    public void ActivatePony(PonyType type, CityBehaviour startCity, int cityDist)
+    /// <param name="type">Type of the messenger (person/pony/train/...).
+    /// <param name="startCity">The city the messenger starts at.</param>
+    /// <param name="cityDist">The number of cities the messenger travels to.</param>
+    public void ActivateMessenger(MessengerType type, CityBehaviour startCity, int cityDist)
     {
         // This assertation fixes ridiculous distances, but doesn't cover slightly excessive
         // distances (which are handled below and ignored).
         Debug.Assert(cityDist < GameObject.Find("Cities").transform.childCount);
 
-        // Recursively, randomly generate pony journey.
+        // Recursively, randomly generate journey.
         Edge journey = RandomlyGeneratePath(cityDist, new List<CityBehaviour> { startCity }, null);
 
-        // Calculate which edges are contained entirely by the pony path.
-        m_ponyPaths = new();
+        // Calculate which edges are contained entirely by the path.
+        m_messengerEdges = new();
         Transform edgeTransforms = GameObject.Find("Edges").transform;
         foreach (Transform edgeTransform in edgeTransforms)
         {
-            EdgeBehaviour pb = edgeTransform.GetComponent<EdgeBehaviour>();
-            Vector2[] pbPathPts = pb.Points.ToArray();
+            EdgeBehaviour eb = edgeTransform.GetComponent<EdgeBehaviour>();
+            Vector2[] ebPathPts = eb.Points.ToArray();
 
-            // Check path completely contains pb's points.
-            if (journey.Points.Intersect(pbPathPts).Count() == pbPathPts.Length)
+            // Check path completely contains messenger's points.
+            if (journey.Points.Intersect(ebPathPts).Count() == ebPathPts.Length)
             {
-                m_ponyPaths.Add(pb);
+                m_messengerEdges.Add(eb);
             }
         }
 
-        m_pony = new Pony(type, this, journey);
-        PonyActive = true;
+        m_messenger = new Messenger(type, this, journey);
+        MessengerActive = true;
     }
 
 
     /// <summary>
-    /// Recursively, randomly generates a pony path.
+    /// Recursively, randomly generates a path.
     /// </summary>
     /// <param name="dist">The maximum (goal) number of cities the path will be. May be lower
-    /// if the path reaches a leaf node early. This is fine as the pony will just move slower.
+    /// if the path reaches a leaf node early. This is fine as messenger will just move slower.
     /// </param>
     /// <param name="visited">A record of all visited cities.</param>
     private Edge RandomlyGeneratePath(int dist, List<CityBehaviour> visited, Edge genPath)
@@ -241,16 +241,19 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
 
     /// <summary>
-    /// Called when the pony is victorious or loses. Pony disappears here,
-    /// and the earl's pony activity status is updated.
+    /// Called when the messenger reaches its dest, or you beat it there. Messenger disappears,
+    /// and the messenger activity status is updated.
     /// </summary>
     public void Explode()
     {
         gameObject.SetActive(false);
-        PonyActive = false;
+        MessengerActive = false;
     }
 
 
+    /// <summary>
+    /// The messenger beat you to its destination; you lose a life, and the messenger disappears.
+    /// </summary>
     private void OnGoalReached()
     {
         m_gb.LoseLife(CityMessageBehaviour.Manager.ActiveMessages[m_message.Index]);
@@ -280,9 +283,9 @@ public class PonyBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     public void SetPathPulse(bool pulse)
     {
-        for (int i = 0; i < m_ponyPaths.Count; i++)
+        for (int i = 0; i < m_messengerEdges.Count; i++)
         {
-            m_ponyPaths[i].GetComponent<TelegraphLineBehaviour>().SetPulsing(pulse);
+            m_messengerEdges[i].GetComponent<TelegraphLineBehaviour>().SetPulsing(pulse);
         }
     }
 }

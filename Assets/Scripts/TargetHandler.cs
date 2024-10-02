@@ -32,7 +32,7 @@ public class TargetHandler : MonoBehaviour
     [SerializeField]
     private TMP_Text m_targetHintText;
 
-    private PonyBehaviour m_targetPony;
+    private MessengerBehaviour m_targetPony;
 
 
     private void Start()
@@ -45,13 +45,7 @@ public class TargetHandler : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// Set the display text of the target morse string.
-    /// </summary>
-
-
-
-    public void SetPony(PonyBehaviour pony)
+    public void SetPony(MessengerBehaviour pony)
     {
         m_targetPony = pony;
     }

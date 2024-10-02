@@ -30,8 +30,8 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
     /// The pony that will transmit this message when it activates.
     /// </summary>
     [SerializeField]
-    private PonyBehaviour m_pony;
-    public PonyBehaviour Pony => m_pony;
+    private MessengerBehaviour m_pony;
+    public MessengerBehaviour Messenger => m_pony;
 
     /// <summary>
     /// The index of the message in the manager's Words list.
@@ -70,7 +70,7 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
         // the message disappear.
 
         // Also the message must disappear when its pony becomes inactive.
-        if (Active && !Pony.PonyActive)
+        if (Active && !Messenger.MessengerActive)
         {
             // Message disappear
             if (Manager.CurrentMorseTarget == MorseCode.EnglishStringToMorseString(Manager.ActiveMessages[Index]))
@@ -90,10 +90,10 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
     /// </summary>
     public void OnPointerEnter(PointerEventData _)
     {
-        if (Pony.PonyActive)
+        if (Messenger.MessengerActive)
         {
             m_targetHandler.Target = Manager.ActiveMessages[Index];
-            Pony.SetPathPulse(true);
+            Messenger.SetPathPulse(true);
         }
     }
 
@@ -104,40 +104,40 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
     /// </summary>
     public void OnPointerExit(PointerEventData _)
     {
-        if (Pony.PonyActive)
+        if (Messenger.MessengerActive)
         {
             m_targetHandler.Target = MorseCode.MorseStringToEnglishString(Manager.CurrentMorseTarget ?? new());
-            Pony.SetPathPulse(false);
+            Messenger.SetPathPulse(false);
         }
     }
 
 
     public void OnClicked()
     {
-        if (Pony.PonyActive)
+        if (Messenger.MessengerActive)
         {
             Manager.CurrentMorseTarget = MorseCode.EnglishStringToMorseString(Manager.ActiveMessages[Index]);
-            m_targetHandler.SetPony(Pony);
+            m_targetHandler.SetPony(Messenger);
         }
     }
 
 
-    public void ActivateEarl(WordDifficulty diff, PonyType type)
+    public void ActivateMessage(SpawnDifficulty diff)
     {
         GetComponent<Button>().enabled = true;
         m_glow.enabled = true;
         m_scroll.enabled = true;
 
-        if (Pony.gameObject.activeSelf)
+        if (Messenger.gameObject.activeSelf)
         {
             Debug.LogWarning("Pony is already activated.");
         }
 
-        Pony.gameObject.SetActive(true);
-        Pony.ActivatePony(type, m_city, 1);
+        Messenger.gameObject.SetActive(true);
+        Messenger.ActivateMessenger(diff.Messenger, m_city, 1);
 
         // Get all messages belonging to our message's required difficulty.
-        List<string> messages = Manager.AllMessages[diff];
+        List<string> messages = Manager.AllMessages[diff.WordDiff];
         
         // Separate the words file by newlines, then remove all words that have already been selected.
         string message = "";

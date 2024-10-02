@@ -4,13 +4,52 @@ using System.Linq;
 using UnityEngine;
 
 
+public class Version : IComparable<Version>
+{
+    public enum Stage
+    {
+        Alpha,
+        Beta
+    }
+
+    private Stage m_devStage;
+    private int m_major;
+    private int m_minor;
+
+
+    public Version(Stage devStage, int major, int minor)
+    {
+        m_devStage = devStage;
+        m_major = major;
+        m_minor = minor;
+    }
+
+
+    public int CompareTo(Version other)
+    {
+        // First compare dev stage difference
+        int devDiff = m_devStage.CompareTo(other.m_devStage);
+        if (devDiff != 0)
+            return devDiff;
+
+        // Then compare major diff
+        int majorDiff = m_major;
+        if (majorDiff != 0)
+            return majorDiff;
+
+        // Now compare minor diff
+        int minorDiff = m_minor;
+        if (minorDiff != 0)
+            return minorDiff;
+
+        return 0;
+    }
+}
+
+
 [Serializable]
 public class SaveData
 {
-    public const int HIGHEST_LEVEL = 2;
-    public const int ENDLESS_FLAG = 100;
-
-
     private static SaveData m_inst;
     public static SaveData Instance
     {
@@ -19,19 +58,54 @@ public class SaveData
             if (m_inst == null)
             {
                 m_inst = Saving.Load();
+
+                // Add a check for save version - support migrating save versions
+                if (m_inst.saveVersion.CompareTo(currentVersion) < 0)
+                {
+                    // Set all values to default
+                    SaveData newInst = new();
+
+                    foreach (var f in newInst.GetType().GetFields(System.Reflection.BindingFlags.Public))
+                    {
+                        // Use reflection for all existing save data, and default for the rest.
+                        f.SetValue(newInst, f.GetValue(m_inst));
+                    }
+
+                    m_inst = newInst;
+                }
             }
+
             return m_inst;
         }
     }
     public static void Reset() { m_inst = new(); }
 
+    public readonly static Version currentVersion = new(Version.Stage.Alpha, 4, 0);
+    public readonly Version saveVersion = currentVersion;
+
 
     /// <summary>
-    /// ? questionable practice, where the last selected level (from main menu) is saved here.
+    /// Whether an endless level was selected last from the menu, or not.
+    /// </summary>
+    public bool endlessSelected = false;
+    /// <summary>
+    /// Last selected level from the menu.
     /// </summary>
     public int levelSelected = 0;
-
+    /// <summary>
+    /// Index of the highest level beaten by the player.
+    /// </summary>
     public int highestLevelBeaten = -1;
+    /// <summary>
+    /// A list of ranks of completion. 0 is default for each level, when
+    /// the user beats a level, the level's index in this array is set
+    /// to 1 (1 life left), 2 (2 lives left), etc.
+    /// </summary>
+    public int[] completionRanks = new int[HIGHEST_LEVEL];
+    
+    public const int HIGHEST_LEVEL = 8;
+
+
     public bool fullscreen = false;
     public bool easyMode = false;
 

@@ -13,17 +13,7 @@ public class LevelSelectBtnBehaviour : LevelSelectBehaviour
     private TMP_Text m_text;
     [SerializeField]
     private Image m_locked;
-    [SerializeField]
-    private int m_endlessLevel;
 
-    private void Awake()
-    {
-        // Manual Init (e.g. Endless levels)
-        if (m_endlessLevel >= 0)
-        {
-            Init(SaveData.ENDLESS_FLAG + m_endlessLevel);
-        }
-    }
 
     public override bool Init(int btnIndex)
     {
@@ -44,6 +34,7 @@ public class LevelSelectBtnBehaviour : LevelSelectBehaviour
     public void OnLevelBtnClicked(int level)
     {
         SaveData.Instance.levelSelected = level;
+        SaveData.Instance.endlessSelected = false;
         SceneManager.LoadScene("Game");
     }
 }

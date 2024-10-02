@@ -1,0 +1,27 @@
+<phrases>
+    <phrase>
+        <noun></noun>
+    </phrase>
+
+    <phrase>
+        <noun></noun>
+        <verb></verb>
+    </phrase>
+
+    <phrase>
+        <adj></adj>
+        <noun></noun>
+        <verb></verb>
+    </phrase>
+
+    <phrase>
+        <adj></adj>
+        <noun></noun>
+    </phrase>
+
+    <phrase>
+        <adverb></adverb>
+        <adj></adj>
+        <noun></noun>
+    </phrase>
+</phrases>
