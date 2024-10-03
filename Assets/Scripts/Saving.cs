@@ -63,8 +63,6 @@ public class SaveData
                 // Add a check for save version - support migrating save versions
                 if (m_inst.saveVersion.CompareTo(currentVersion) < 0)
                 {
-                    Debug.Log("HI");
-
                     // Set all values to default
                     SaveData newInst = new();
 
@@ -126,6 +124,16 @@ public class SaveData
     /// SFX volume, from 0 to 100.
     /// </summary>
     public float sfxVolume = 50;
+
+    /// <summary>
+    /// Dot signal must have an input duration of at least ... seconds.
+    /// </summary>
+    public const float DOT_SIG_LONGER_THAN = 0.0f;
+
+    /// <summary>
+    /// Dash signal must have an input duration of at least ... seconds.
+    /// </summary>
+    public float dashSigLongerThan = 0.3f;
 }
 
 

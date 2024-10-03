@@ -18,6 +18,8 @@ public class MainMenuHandler : MonoBehaviour
     private Slider m_musicVolume;
     [SerializeField]
     private Slider m_sfxVolume;
+    [SerializeField]
+    private Slider m_dashTiming;
 
     private List<Resolution> m_supportedResolutions;
 
@@ -30,6 +32,8 @@ public class MainMenuHandler : MonoBehaviour
         m_musicVolume.GetComponentInParent<SliderBehaviour>().SetSliderValue(SaveData.Instance.musicVolume);
         m_sfxVolume.onValueChanged.AddListener(OnSFXVolumeValueChanged);
         m_sfxVolume.GetComponentInParent<SliderBehaviour>().SetSliderValue(SaveData.Instance.sfxVolume);
+        m_dashTiming.onValueChanged.AddListener(OnDashTimingValueChanged);
+        m_dashTiming.GetComponentInParent<SliderBehaviour>().SetSliderValue(SaveData.Instance.dashSigLongerThan);
 
         m_fullscreenToggle.isOn = SaveData.Instance.fullscreen;
         m_easyModeToggle.isOn = SaveData.Instance.easyMode;
@@ -76,7 +80,6 @@ public class MainMenuHandler : MonoBehaviour
         Debug.Assert(resIndex != -1, "Previous resolution is unsupported.");
 
         resIndex = m_supportedResolutions.ToArray().CircularNextIndex(resIndex, right);
-        print(resIndex);
 
         SaveData.Instance.resolution = m_supportedResolutions[resIndex];
         ApplyVideoSettings();
@@ -106,6 +109,15 @@ public class MainMenuHandler : MonoBehaviour
     public void OnSFXVolumeValueChanged(float volume)
     {
         SaveData.Instance.sfxVolume = volume;
+        Saving.Save();
+    }
+
+
+    public void OnDashTimingValueChanged(float seconds)
+    {
+        float rounded = Mathf.Floor(seconds * 10) / 10;
+        SaveData.Instance.dashSigLongerThan = rounded;
+        m_dashTiming.GetComponentInParent<SliderBehaviour>().SetSliderValue(rounded);
         Saving.Save();
     }
 }

@@ -93,18 +93,18 @@ public struct MorseChar : IEquatable<MorseChar>
 }
 
 
-public class MorseString : IEquatable<MorseString>
+public class MorseWord : IEquatable<MorseWord>
 {
     public List<MorseChar> Items;
 
 
-    public MorseString()
+    public MorseWord()
     {
         Items = new();
     }
 
 
-    public MorseString(MorseString other)
+    public MorseWord(MorseWord other)
     {
         Items = new(other.Items);
     }
@@ -116,7 +116,7 @@ public class MorseString : IEquatable<MorseString>
     }
 
 
-    public bool Equals(MorseString other)
+    public bool Equals(MorseWord other)
     {
         if (other == null) return false;
         if (Items.SequenceEqual(other.Items)) return true;
@@ -143,19 +143,59 @@ public class MorseString : IEquatable<MorseString>
 }
 
 
+public class MorsePhrase : IEquatable<MorsePhrase>
+{
+    public List<MorseWord> Items;
+
+
+    public MorsePhrase()
+    {
+        Items = new();
+    }
+
+
+    public MorsePhrase(MorsePhrase other)
+    {
+        Items = new(other.Items);
+    }
+
+
+    public void AddWord(MorseWord word)
+    {
+        Items.Add(word);
+    }
+
+
+    public bool Equals(MorsePhrase other)
+    {
+        if (other == null) return false;
+        if (Items.SequenceEqual(other.Items)) return true;
+        return false;
+    }
+
+
+    /// <summary>
+    /// Translates a morse code string into a string of '-', '.' and ' ' characters.
+    /// </summary>
+    /// <returns>The translated - . and space character string.</returns>
+    public override string ToString()
+    {
+        string ret = "";
+        foreach (MorseWord ch in Items)
+        {
+            ret += ch.ToString() + "//";
+        }
+
+        // Remove trailing '//'
+        if (ret.Length > 0) return ret.Remove(ret.Length - 2, 2);
+        return ret;
+    }
+}
+
+
 public static class MorseCode
 {
     // ------------------------------------ STATIC VARS -------------------------------------------
-
-    /// <summary>
-    /// Dot signal must have an input duration of at least ... seconds.
-    /// </summary>
-    public const float DOT_SIG_LONGER_THAN = 0.0f;
-
-    /// <summary>
-    /// Dash signal must have an input duration of at least ... seconds.
-    /// </summary>
-    public const float DASH_SIG_LONGER_THAN = 0.3f;
 
 
     private static readonly Dictionary<char, MorseChar> s_charToMorseChar = new Dictionary<char, MorseChar>
@@ -233,10 +273,10 @@ public static class MorseCode
     }
 
 
-    public static MorseString EnglishStringToMorseString(string englishStr)
+    public static MorseWord EnglishWordToMorseWord(string englishWord)
     {
-        MorseString ret = new();
-        foreach (char englishChar in englishStr)
+        MorseWord ret = new();
+        foreach (char englishChar in englishWord)
         {
             ret.AddChar(EnglishCharToMorseChar(englishChar));
         }
@@ -244,12 +284,36 @@ public static class MorseCode
     }
 
 
-    public static string MorseStringToEnglishString(MorseString morseString)
+    public static string MorseWordToEnglishWord(MorseWord morseWord)
     {
         string ret = "";
-        foreach (MorseChar morseChar in morseString.Items)
+        foreach (MorseChar morseChar in morseWord.Items)
         {
             ret += MorseCharToEnglishChar(morseChar);
+        }
+        return ret;
+    }
+
+
+    public static MorsePhrase EnglishPhraseToMorsePhrase(string englishPhrase)
+    {
+        MorsePhrase ret = new();
+
+        // Split the phrase into words by spaces.
+        foreach (string englishWord in englishPhrase.Split(' '))
+        {
+            ret.AddWord(EnglishWordToMorseWord(englishWord));
+        }
+        return ret;
+    }
+
+
+    public static string MorsePhraseToEnglishPhrase(MorsePhrase morsePhrase)
+    {
+        string ret = "";
+        foreach (MorseWord morseWord in morsePhrase.Items)
+        {
+            ret += MorseWordToEnglishWord(morseWord);
         }
         return ret;
     }

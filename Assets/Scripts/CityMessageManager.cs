@@ -13,10 +13,10 @@ public class CityMessageManager : MonoBehaviour
     private int m_numActiveMessages = 0;
 
     /// <summary>
-    /// The target MorseString. When the input equals the target, the message is
+    /// The target MorseWord. When the input equals the target, the message is
     /// completed.
     /// </summary>
-    public MorseString CurrentMorseTarget { get; set; } = null;
+    public MorsePhrase CurrentMorseTarget { get; set; } = null;
 
     /// <summary>
     /// WordDifficulty to list of messages of that WordDifficulty.

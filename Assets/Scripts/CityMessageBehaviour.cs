@@ -73,7 +73,7 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
         if (Active && !Messenger.MessengerActive)
         {
             // Message disappear
-            if (Manager.CurrentMorseTarget == MorseCode.EnglishStringToMorseString(Manager.ActiveMessages[Index]))
+            if (Manager.CurrentMorseTarget == MorseCode.EnglishPhraseToMorsePhrase(Manager.ActiveMessages[Index]))
             {
                 Manager.CurrentMorseTarget = null;
                 m_targetHandler.CompleteTarget();
@@ -106,7 +106,7 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         if (Messenger.MessengerActive)
         {
-            m_targetHandler.Target = MorseCode.MorseStringToEnglishString(Manager.CurrentMorseTarget ?? new());
+            m_targetHandler.Target = MorseCode.MorsePhraseToEnglishPhrase(Manager.CurrentMorseTarget ?? new());
             Messenger.SetPathPulse(false);
         }
     }
@@ -116,7 +116,7 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         if (Messenger.MessengerActive)
         {
-            Manager.CurrentMorseTarget = MorseCode.EnglishStringToMorseString(Manager.ActiveMessages[Index]);
+            Manager.CurrentMorseTarget = MorseCode.EnglishPhraseToMorsePhrase(Manager.ActiveMessages[Index]);
             m_targetHandler.SetPony(Messenger);
         }
     }

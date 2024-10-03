@@ -168,7 +168,6 @@ public class EndlessLevel : Level
                     var incDiff = diff.GetIncreasedDiff();
                     if (incDiff == null)
                     {
-                        Debug.Log(i);
                         return;
                     }
 

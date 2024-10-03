@@ -22,10 +22,16 @@ public class InputHandler : MonoBehaviour
     public MorseChar MorseCharInput => m_morseCharInput;
 
     /// <summary>
-    /// Input from the user joining all MorseChar inputs to make a word/sentence.
-    /// e.g. .... . .-.. .-.. ---
+    /// Input from the user joining all MorseChar inputs to make a word.
+    /// e.g. ...././.-../.-../---
     /// </summary>
-    private MorseString m_morseStringInput;
+    private MorseWord m_morseWordInput = new();
+
+    /// <summary>
+    /// Input from the user joining all MorseChar inputs to make a word/sentence.
+    /// e.g. ...././.-../.-../---//.../..../././.--.
+    /// </summary>
+    private MorsePhrase m_morsePhraseInput = new();
 
 
     /// <summary>
@@ -47,13 +53,6 @@ public class InputHandler : MonoBehaviour
 
     [SerializeField]
     private AudioSource m_morseSfx;
-
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        m_morseStringInput = new();
-    }
 
 
     void Update()
@@ -96,11 +95,11 @@ public class InputHandler : MonoBehaviour
             if (Input.GetKeyUp(SIGNAL_KEY))
             {
                 // Add the correct signal type
-                if (m_currentSignalLength > MorseCode.DASH_SIG_LONGER_THAN)
+                if (m_currentSignalLength > SaveData.Instance.dashSigLongerThan)
                 {
                     m_morseCharInput.AddSig(EMorseSignal.Dash);
                 }
-                else if (m_currentSignalLength > MorseCode.DOT_SIG_LONGER_THAN)
+                else if (m_currentSignalLength > SaveData.DOT_SIG_LONGER_THAN)
                 {
                     m_morseCharInput.AddSig(EMorseSignal.Dot);
                 }
@@ -115,14 +114,28 @@ public class InputHandler : MonoBehaviour
             {
                 //m_timeSinceLastSignal += Time.deltaTime;
                 
-                // The string does not yet have the char appended, so index = count (* 2 to account for char breaks).
-                int charIndex = m_morseStringInput.Items.Count;
+                // The word does not yet have the char appended, so index = count.
+                int charIndex = m_morseWordInput.Items.Count;
+
+                // The phrase does not yet have the word appended, so index = count.
+                int wordIndex = m_morsePhraseInput.Items.Count;
 
                 // If the current character is correct, allow a character break
-                if (m_earlManager.CurrentMorseTarget.Items[charIndex].Equals(m_morseCharInput))
+                if (m_earlManager.CurrentMorseTarget.Items[wordIndex].Items[charIndex].Equals(m_morseCharInput) == true)
                 {
-                    m_morseStringInput.AddChar(m_morseCharInput);
+                    m_morseWordInput.AddChar(m_morseCharInput);
                     m_morseCharInput = MorseChar.Empty;
+                }
+
+                // Handle word breaks (if the current word is valid)
+                if (MorseCode.MorseWordToEnglishWord(m_morseWordInput) != "")
+                {
+                    // If the current character is correct, allow a character break
+                    if (m_earlManager.CurrentMorseTarget.Items[wordIndex].Equals(m_morseWordInput) == true)
+                    {
+                        m_morsePhraseInput.AddWord(m_morseWordInput);
+                        m_morseWordInput = new();
+                    }
                 }
             }
         }
@@ -132,20 +145,24 @@ public class InputHandler : MonoBehaviour
     private void VisualiseMorseInput()
     {
         // Visualise morse code input (morse string + the current unfinished char)
-        MorseString visualiser = new(m_morseStringInput);
+        MorsePhrase visualiser = new(m_morsePhraseInput);
+        MorseWord visualisedWord = new(m_morseWordInput);
         MorseChar visualisedChar = m_morseCharInput;
 
         // Add a visualisation for the current signal
-        if (m_currentSignalLength > MorseCode.DASH_SIG_LONGER_THAN)
+        if (m_currentSignalLength > SaveData.Instance.dashSigLongerThan)
         {
             visualisedChar.AddSig(EMorseSignal.Dash);
         }
-        else if (m_currentSignalLength > MorseCode.DOT_SIG_LONGER_THAN)
+        else if (m_currentSignalLength > SaveData.DOT_SIG_LONGER_THAN)
         {
             visualisedChar.AddSig(EMorseSignal.Dot);
         }
 
-        visualiser.AddChar(visualisedChar);
+        // Add that incomplete char to the word, then that incomplete word to the phrase
+        visualisedWord.AddChar(visualisedChar);
+        visualiser.AddWord(visualisedWord);
+        
         m_inputText.text = visualiser.ToString();
     }
 
@@ -154,9 +171,10 @@ public class InputHandler : MonoBehaviour
     {
         // Check if the messages match. Messages can be completed only after
         // waiting for the final character break.
-        if (m_morseStringInput.Equals(m_earlManager.CurrentMorseTarget))
+        if (m_morsePhraseInput.Equals(m_earlManager.CurrentMorseTarget))
         {
-            m_morseStringInput = new();
+            m_morsePhraseInput = new();
+            m_morseWordInput = new();
             m_morseCharInput = new();
 
             GetComponent<TargetHandler>().CompleteTarget();
@@ -168,7 +186,7 @@ public class InputHandler : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            m_morseStringInput = new();
+            m_morseWordInput = new();
             m_morseCharInput = new();
         }
 

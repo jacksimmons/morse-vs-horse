@@ -13,7 +13,7 @@ public class TargetHandler : MonoBehaviour
             if (SaveData.Instance.easyMode)
             {
                 m_targetText.text = value;
-                m_targetHintText.text = $"{MorseCode.EnglishStringToMorseString(value)}";
+                m_targetHintText.text = $"{MorseCode.EnglishWordToMorseWord(value)}";
             }
             else
             {
