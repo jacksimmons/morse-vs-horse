@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -14,6 +15,16 @@ public class LevelSelectBtnBehaviour : LevelSelectBehaviour
     [SerializeField]
     private Image m_locked;
 
+    /// <summary>
+    /// Completion rank image, which is set to 1, 2 or 3-ponies.
+    /// Is disabled if the level has a completion rank of 0.
+    /// </summary>
+    [SerializeField]
+    private Image m_completionRankImage;
+
+    [SerializeField]
+    private Sprite[] m_completionRankSprites;
+
 
     public override bool Init(int btnIndex)
     {
@@ -25,8 +36,19 @@ public class LevelSelectBtnBehaviour : LevelSelectBehaviour
             m_btn.interactable = true;
         }
 
+        // Set level number
         m_text.text = $"{Roman.ToRoman(btnIndex + 1)}";
+
+        // Set level listener
         m_btn.onClick.AddListener(() => OnLevelBtnClicked(btnIndex));
+
+        // Set level completion rank (if applicable)
+        int completionRank = SaveData.Instance.completionRanks[btnIndex];
+        if (completionRank > 0)
+        {
+            m_completionRankImage.enabled = true;
+            m_completionRankImage.sprite = m_completionRankSprites[completionRank - 1];
+        }
 
         return true;
     }

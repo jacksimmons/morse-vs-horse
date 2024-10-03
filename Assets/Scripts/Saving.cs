@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 
+[Serializable]
 public class Version : IComparable<Version>
 {
     public enum Stage
@@ -12,33 +13,33 @@ public class Version : IComparable<Version>
         Beta
     }
 
-    private Stage m_devStage;
-    private int m_major;
-    private int m_minor;
+    public Stage devStage;
+    public int major;
+    public int minor;
 
 
     public Version(Stage devStage, int major, int minor)
     {
-        m_devStage = devStage;
-        m_major = major;
-        m_minor = minor;
+        this.devStage = devStage;
+        this.major = major;
+        this.minor = minor;
     }
 
 
     public int CompareTo(Version other)
     {
         // First compare dev stage difference
-        int devDiff = m_devStage.CompareTo(other.m_devStage);
+        int devDiff = devStage.CompareTo(other.devStage);
         if (devDiff != 0)
             return devDiff;
 
         // Then compare major diff
-        int majorDiff = m_major;
+        int majorDiff = major;
         if (majorDiff != 0)
             return majorDiff;
 
         // Now compare minor diff
-        int minorDiff = m_minor;
+        int minorDiff = minor;
         if (minorDiff != 0)
             return minorDiff;
 
@@ -62,6 +63,8 @@ public class SaveData
                 // Add a check for save version - support migrating save versions
                 if (m_inst.saveVersion.CompareTo(currentVersion) < 0)
                 {
+                    Debug.Log("HI");
+
                     // Set all values to default
                     SaveData newInst = new();
 
@@ -80,9 +83,12 @@ public class SaveData
     }
     public static void Reset() { m_inst = new(); }
 
-    public readonly static Version currentVersion = new(Version.Stage.Alpha, 4, 0);
-    public readonly Version saveVersion = currentVersion;
+    public readonly static Version currentVersion = new(Version.Stage.Alpha, 4, 1);
 
+    /// <summary>
+    /// Version of the save. Set during write to file.
+    /// </summary>
+    public Version saveVersion = null;
 
     /// <summary>
     /// Whether an endless level was selected last from the menu, or not.
@@ -101,9 +107,9 @@ public class SaveData
     /// the user beats a level, the level's index in this array is set
     /// to 1 (1 life left), 2 (2 lives left), etc.
     /// </summary>
-    public int[] completionRanks = new int[HIGHEST_LEVEL];
+    public int[] completionRanks = new int[NUM_LEVELS];
     
-    public const int HIGHEST_LEVEL = 8;
+    private const int NUM_LEVELS = 9;
 
 
     public bool fullscreen = false;
@@ -140,6 +146,7 @@ public static class Saving
     /// </summary>
     public static void Save()
     {
+        SaveData.Instance.saveVersion = SaveData.currentVersion;
         SaveToFile(SaveData.Instance, "Save.dat");
     }
 
