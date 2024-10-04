@@ -27,16 +27,21 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
     private CityBehaviour m_city;
 
     /// <summary>
-    /// The pony that will transmit this message when it activates.
+    /// The messenger that will transmit this message when it activates.
     /// </summary>
     [SerializeField]
-    private MessengerBehaviour m_pony;
-    public MessengerBehaviour Messenger => m_pony;
+    private MessengerBehaviour m_messenger;
+    public MessengerBehaviour Messenger => m_messenger;
 
     /// <summary>
     /// The index of the message in the manager's Words list.
     /// </summary>
     public int Index { get; private set; }
+
+    /// <summary>
+    /// The object handling the player's input.
+    /// </summary>
+    private InputHandler m_inputHandler;
 
     /// <summary>
     /// The object handling the player's input target.
@@ -59,6 +64,7 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
     private void Start()
     {
         m_targetHandler = GameObject.FindWithTag("GameController").GetComponent<TargetHandler>();
+        m_inputHandler = m_targetHandler.gameObject.GetComponent<InputHandler>();
     }
 
 
@@ -79,14 +85,14 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
                 m_targetHandler.CompleteTarget();
             }
 
-            // Earl disappear
-            DeactivateEarl();
+            // Make the message disappear
+            DeactivateMessage();
         }
     }
 
 
     /// <summary>
-    /// When hovering, target text is set to this earl's message.
+    /// When hovering, target text is set to this city's message.
     /// </summary>
     public void OnPointerEnter(PointerEventData _)
     {
@@ -99,8 +105,8 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
 
 
     /// <summary>
-    /// When leaving hovering, target text is set to the current earl's message.
-    /// This will undo the hovering text change, or do nothing if the earl was clicked on.
+    /// When leaving hovering, target text is set to the current city's message.
+    /// This will undo the hovering text change, or do nothing if the city was clicked on.
     /// </summary>
     public void OnPointerExit(PointerEventData _)
     {
@@ -116,6 +122,10 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         if (Messenger.MessengerActive)
         {
+            // Reset input (if this is a different city)
+            m_inputHandler.OnMessageSelected(this);
+
+            // Update morse target and its messenger
             Manager.CurrentMorseTarget = MorseCode.EnglishPhraseToMorsePhrase(Manager.ActiveMessages[Index]);
             m_targetHandler.SetPony(Messenger);
         }
@@ -158,7 +168,7 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
     }
 
 
-    private void DeactivateEarl()
+    private void DeactivateMessage()
     {
         GetComponent<Button>().enabled = false;
         m_glow.enabled = false;
@@ -168,6 +178,6 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
         Active = false;
 
         // Disable pulsing
-        m_pony.SetPathPulse(false);
+        m_messenger.SetPathPulse(false);
     }
 }

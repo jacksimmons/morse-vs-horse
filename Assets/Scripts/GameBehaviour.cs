@@ -70,12 +70,12 @@ public class GameBehaviour : MonoBehaviour
 
         // Handle moving active earls to inactive so they can be reused.
         List<CityMessageBehaviour> activeEarlsTemp = new(m_activeMessages);
-        foreach (CityMessageBehaviour earl in activeEarlsTemp)
+        foreach (CityMessageBehaviour msg in activeEarlsTemp)
         {
-            if (!earl.Messenger.MessengerActive && !earl.Active)
+            if (!msg.Messenger.MessengerActive && !msg.Active)
             {
-                m_activeMessages.Remove(earl);
-                m_inactiveMessages.Add(earl);
+                m_activeMessages.Remove(msg);
+                m_inactiveMessages.Add(msg);
                 m_poniesGone++;
 
                 // If all messengers have come and gone, and you are still alive, then you have won.
@@ -137,14 +137,14 @@ public class GameBehaviour : MonoBehaviour
             }
 
             // Choose a random inactive city to send a message.
-            CityMessageBehaviour cmb = m_inactiveMessages[Random.Range(0, m_inactiveMessages.Count)];
+            CityMessageBehaviour msg = m_inactiveMessages[Random.Range(0, m_inactiveMessages.Count)];
 
             // Activate the pony and earl UI.
-            cmb.ActivateMessage(diff);
+            msg.ActivateMessage(diff);
 
             // Set the city's message to active.
-            m_inactiveMessages.Remove(cmb);
-            m_activeMessages.Add(cmb);
+            m_inactiveMessages.Remove(msg);
+            m_activeMessages.Add(msg);
             m_ponySfx.Play();
         }));
     }

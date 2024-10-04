@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -262,22 +263,30 @@ public class MessengerBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerE
 
 
     /// <summary>
-    /// When hovering, show timer.
+    /// When hovering, show timer & pulse, and call city's hover event.
     /// </summary>
     public void OnPointerEnter(PointerEventData _)
     {
         GetComponentInChildren<TMP_Text>().enabled = true;
         SetPathPulse(true);
+        m_message.OnPointerEnter(_);
     }
 
 
     /// <summary>
-    /// Hide timer.
+    /// Hide timer & pulse, and call city's dehover event.
     /// </summary>
     public void OnPointerExit(PointerEventData _)
     {
         GetComponentInChildren<TMP_Text>().enabled = false;
         SetPathPulse(false);
+        m_message.OnPointerExit(_);
+    }
+
+
+    public void OnClicked()
+    {
+        m_message.OnClicked();
     }
 
 

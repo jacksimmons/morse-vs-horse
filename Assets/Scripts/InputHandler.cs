@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class InputHandler : MonoBehaviour
@@ -11,8 +12,6 @@ public class InputHandler : MonoBehaviour
     private CityMessageManager m_earlManager;
     [SerializeField]
     private TargetHandler m_targetHandler;
-
-    private const KeyCode SIGNAL_KEY = KeyCode.Space;
 
     /// <summary>
     /// Input from the user corresponding to the current Morse Code character
@@ -54,25 +53,26 @@ public class InputHandler : MonoBehaviour
     [SerializeField]
     private AudioSource m_morseSfx;
 
+    private CityMessageBehaviour m_messageSelected = null;
+
 
     void Update()
     {
         HandleMorseInput();
         VisualiseMorseInput();
-        CheckMorseInput();
-        
         HandleOtherInput();
+        CheckMorseInput();
     }
 
 
     private void HandleMorseInput()
     {
-        if (Input.GetKeyDown(SIGNAL_KEY))
+        if (Input.GetButtonDown("Signal"))
         {
             m_morseSfx.Play();
         }
 
-        if (Input.GetKeyUp(SIGNAL_KEY))
+        if (Input.GetButtonUp("Signal"))
         {
             m_morseSfx.Pause();
         }
@@ -84,7 +84,7 @@ public class InputHandler : MonoBehaviour
         }
 
         // If input is held...
-        if (Input.GetKey(SIGNAL_KEY))
+        if (Input.GetButton("Signal"))
         {
             m_currentSignalLength += Time.deltaTime;
         }
@@ -92,7 +92,7 @@ public class InputHandler : MonoBehaviour
         else
         {
             // Handle key release (Dot or Dash)
-            if (Input.GetKeyUp(SIGNAL_KEY))
+            if (Input.GetButtonUp("Signal"))
             {
                 // Add the correct signal type
                 if (m_currentSignalLength > SaveData.Instance.dashSigLongerThan)
@@ -121,21 +121,41 @@ public class InputHandler : MonoBehaviour
                 int wordIndex = m_morsePhraseInput.Items.Count;
 
                 // If the current character is correct, allow a character break
-                if (m_earlManager.CurrentMorseTarget.Items[wordIndex].Items[charIndex].Equals(m_morseCharInput) == true)
+                MorseChar morseCharTarget = m_earlManager.CurrentMorseTarget.Items[wordIndex].Items[charIndex];
+                if (morseCharTarget.Equals(m_morseCharInput) == true)
                 {
                     m_morseWordInput.AddChar(m_morseCharInput);
                     m_morseCharInput = MorseChar.Empty;
-                }
 
-                // Handle word breaks (if the current word is valid)
-                if (MorseCode.MorseWordToEnglishWord(m_morseWordInput) != "")
-                {
-                    // If the current character is correct, allow a character break
-                    if (m_earlManager.CurrentMorseTarget.Items[wordIndex].Equals(m_morseWordInput) == true)
+                    // If the current word is correct, allow a word break
+                    if (MorseCode.MorseWordToEnglishWord(m_morseWordInput) != "")
                     {
-                        m_morsePhraseInput.AddWord(m_morseWordInput);
-                        m_morseWordInput = new();
+                        // If the current character is correct, allow a character break
+                        if (m_earlManager.CurrentMorseTarget.Items[wordIndex].Equals(m_morseWordInput) == true)
+                        {
+                            m_morsePhraseInput.AddWord(m_morseWordInput);
+                            m_morseWordInput = new();
+                        }
                     }
+                }
+                else
+                {
+                    // Get the current character input, and the completed character target
+                    // E.g. Input (--) Target (--.)
+                    string charInput = m_morseCharInput.ToString();
+                    string charTarget = morseCharTarget.ToString();
+
+                    // The target char truncated to have same length as the input.
+                    // The input must equal this for it to be correct.
+                    // E.g. CorrectInput (--)
+                    string correctCharInput = (charInput.Length > charTarget.Length)
+                        ? charTarget
+                        : charTarget[..charInput.Length];
+
+                    // Set the input text colour to white if correct, red if incorrect
+                    m_inputText.color = (charInput == correctCharInput)
+                        ? Color.white
+                        : Color.red;
                 }
             }
         }
@@ -184,10 +204,22 @@ public class InputHandler : MonoBehaviour
 
     private void HandleOtherInput()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        // Handle clear
+        if (Input.GetButtonDown("ClearPhrase"))
         {
+            m_morsePhraseInput = new();
             m_morseWordInput = new();
             m_morseCharInput = new();
+
+            m_inputText.color = Color.white;
+        }
+
+        // Handle backspace
+        if (Input.GetButtonDown("ClearCharacter"))
+        {
+            m_morseCharInput = new();
+
+            m_inputText.color = Color.white;
         }
 
         if (Input.GetKeyDown(KeyCode.L))
@@ -216,5 +248,27 @@ public class InputHandler : MonoBehaviour
         m_lookupTablePages[index].SetActive(true);
 
         m_lookupTablePageIndex = index;
+    }
+
+
+    /// <summary>
+    /// Callback for when a city (or its horse) is clicked on, providing
+    /// the city's message as an argument.
+    /// </summary>
+    public void OnMessageSelected(CityMessageBehaviour msg)
+    {
+        // Exit early if clicked on the same city twice
+        if (msg == m_messageSelected)
+        {
+            return;
+        }
+
+        // Otherwise, reset input, and change the selected message
+        m_messageSelected = msg;
+        m_morseCharInput = new();
+        m_morseWordInput = new();
+        m_morsePhraseInput = new();
+
+        m_inputText.color = Color.white;
     }
 }
