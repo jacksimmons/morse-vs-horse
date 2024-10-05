@@ -60,6 +60,13 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
     [SerializeField]
     private Image m_glow;
 
+    /// <summary>
+    /// The timer showing how long left the messenger has before it reaches
+    /// its destination.
+    /// </summary>
+    [SerializeField]
+    private TMP_Text m_messengerTimer;
+
 
     private void Start()
     {
@@ -99,7 +106,12 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
         if (Messenger.MessengerActive)
         {
             m_targetHandler.Target = Manager.ActiveMessages[Index];
-            Messenger.SetPathPulse(true);
+            m_messengerTimer.enabled = true;
+
+            // Enable pulse, if this messenger is not set active and the user started hovering over it.
+            // Otherwise, if the messenger is active, the telegraph line should stay on, rather than pulsing.
+            if (m_targetHandler.TargetMessenger != Messenger)
+                Messenger.SetTelegraphPulse(TelegraphPulse.Pulsing);
         }
     }
 
@@ -113,7 +125,17 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
         if (Messenger.MessengerActive)
         {
             m_targetHandler.Target = MorseCode.MorsePhraseToEnglishPhrase(Manager.CurrentMorseTarget ?? new());
-            Messenger.SetPathPulse(false);
+            m_messengerTimer.enabled = false;
+
+            // Disable pulse, if this messenger is not set active and the user stopped hovering over it.
+            // Otherwise, if the messenger is active, the telegraph should stay on until it is deactivated.
+            if (m_targetHandler.TargetMessenger != Messenger)
+                Messenger.SetTelegraphPulse(TelegraphPulse.Off);
+
+            // Set pulse for the target messenger (if it's set) to be On again, as pulsing of other messengers'
+            // lines can cause the target's lines to stay off.
+            if (m_targetHandler.TargetMessenger)
+                m_targetHandler.TargetMessenger.SetTelegraphPulse(TelegraphPulse.On);
         }
     }
 
@@ -127,7 +149,24 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
 
             // Update morse target and its messenger
             Manager.CurrentMorseTarget = MorseCode.EnglishPhraseToMorsePhrase(Manager.ActiveMessages[Index]);
-            m_targetHandler.SetPony(Messenger);
+            m_targetHandler.TargetMessenger = Messenger;
+
+            // Lock in telegraph lines as red
+            Messenger.SetTelegraphPulse(TelegraphPulse.On);
+
+            // Turn off telegraph lines for all other messengers
+            // This will not introduce bugs, because this messenger has been clicked on, therefore no others
+            // can be clicked on at the same time. We can safely turn pulsing off for all other messengers.
+            foreach (MessengerBehaviour messenger in MessengerBehaviour.Manager.Messengers)
+            {
+                // Don't turn pulsing off for our messenger!
+                if (messenger == Messenger) continue;
+
+                // Ignore inactive messengers
+                if (messenger == null) continue;
+
+                messenger.SetTelegraphPulse(TelegraphPulse.Off);
+            }
         }
     }
 
@@ -177,7 +216,7 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
         // Set activity flag
         Active = false;
 
-        // Disable pulsing
-        m_messenger.SetPathPulse(false);
+        // Disable pulsing (if user is still hovering for example)
+        m_messenger.SetTelegraphPulse(TelegraphPulse.Off);
     }
 }

@@ -56,7 +56,7 @@ public class InputHandler : MonoBehaviour
     private CityMessageBehaviour m_messageSelected = null;
 
 
-    void Update()
+    private void Update()
     {
         HandleMorseInput();
         VisualiseMorseInput();
@@ -207,11 +207,7 @@ public class InputHandler : MonoBehaviour
         // Handle clear
         if (Input.GetButtonDown("ClearPhrase"))
         {
-            m_morsePhraseInput = new();
-            m_morseWordInput = new();
-            m_morseCharInput = new();
-
-            m_inputText.color = Color.white;
+            ClearPhrase();
         }
 
         // Handle backspace
@@ -226,6 +222,16 @@ public class InputHandler : MonoBehaviour
         {
             CycleLookupTableIndex();
         }
+    }
+
+
+    private void ClearPhrase()
+    {
+        m_morsePhraseInput = new();
+        m_morseWordInput = new();
+        m_morseCharInput = new();
+
+        m_inputText.color = Color.white;
     }
 
 
@@ -265,10 +271,6 @@ public class InputHandler : MonoBehaviour
 
         // Otherwise, reset input, and change the selected message
         m_messageSelected = msg;
-        m_morseCharInput = new();
-        m_morseWordInput = new();
-        m_morsePhraseInput = new();
-
-        m_inputText.color = Color.white;
+        ClearPhrase();
     }
 }

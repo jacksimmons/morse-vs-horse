@@ -17,6 +17,8 @@ using Random = UnityEngine.Random;
 /// </remarks>
 public class MessengerBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
+    public static MessengerManager Manager => GameObject.FindWithTag("GameController").GetComponent<MessengerManager>();
+
     /// <summary>
     /// A connection between two path points (finer than city connections).
     /// </summary>
@@ -263,38 +265,41 @@ public class MessengerBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerE
 
 
     /// <summary>
-    /// When hovering, show timer & pulse, and call city's hover event.
+    /// Delegate to the city's OnPointerEnter event.
     /// </summary>
     public void OnPointerEnter(PointerEventData _)
     {
-        GetComponentInChildren<TMP_Text>().enabled = true;
-        SetPathPulse(true);
         m_message.OnPointerEnter(_);
     }
 
 
     /// <summary>
-    /// Hide timer & pulse, and call city's dehover event.
+    /// Delegate to the city's OnPointerExit event.
     /// </summary>
     public void OnPointerExit(PointerEventData _)
     {
-        GetComponentInChildren<TMP_Text>().enabled = false;
-        SetPathPulse(false);
         m_message.OnPointerExit(_);
     }
 
 
+    /// <summary>
+    /// Delegate to the city's OnClicked event.
+    /// </summary>
     public void OnClicked()
     {
         m_message.OnClicked();
     }
 
-
-    public void SetPathPulse(bool pulse)
+    
+    /// <summary>
+    /// Sets the pulsing status of all telegraph segments on the messenger's path.
+    /// </summary>
+    /// <param name="pulse">Whether it should be off, pulsing, or on.</param>
+    public void SetTelegraphPulse(TelegraphPulse pulse)
     {
         for (int i = 0; i < m_messengerEdges.Count; i++)
         {
-            m_messengerEdges[i].GetComponent<TelegraphLineBehaviour>().SetPulsing(pulse);
+            m_messengerEdges[i].GetComponent<TelegraphLineBehaviour>().Pulse = pulse;
         }
     }
 }

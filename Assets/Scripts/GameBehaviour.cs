@@ -154,11 +154,24 @@ public class GameBehaviour : MonoBehaviour
     {
         m_livesLost++;
 
+        InputHandler ih = GetComponent<InputHandler>();
+        ih.OnMessageSelected(null);
+
         TargetHandler th = GetComponent<TargetHandler>();
+        // If the target is displayed and is the word that was lost
         if (th.Target == wordLost)
         {
             th.Target = "";
-            th.SetPony(null);
+            th.TargetMessenger = null;
+        }
+        // If the target is hidden and is the word that was lost
+        // I.e. if another target is hovered over
+        else if (
+            CityMessageBehaviour.Manager.CurrentMorseTarget != null
+            && MorseCode.MorsePhraseToEnglishPhrase(CityMessageBehaviour.Manager.CurrentMorseTarget) == wordLost
+        )
+        {
+            CityMessageBehaviour.Manager.CurrentMorseTarget = new();
         }
 
         // Go to next life lost sprite.

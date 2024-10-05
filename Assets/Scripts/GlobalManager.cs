@@ -48,6 +48,7 @@ public class GlobalManager : MonoBehaviour
         SteamUserStats.RequestCurrentStats();
     }
 
+
     private void Start()
     {
         m_UserStatsReceived = Callback<UserStatsReceived_t>.Create(OnUserStatsReceived);
@@ -57,6 +58,7 @@ public class GlobalManager : MonoBehaviour
         }
     }
 
+
     private void OnUserStatsReceived(UserStatsReceived_t userStatsReceived)
     {
         if (userStatsReceived.m_eResult != EResult.k_EResultOK)
@@ -65,6 +67,17 @@ public class GlobalManager : MonoBehaviour
             return;
         }
     }
+
+
+    private void Update()
+    {
+        Time.timeScale = 1;
+        if (Input.GetKey(KeyCode.Alpha5))
+        {
+            Time.timeScale = 5;
+        }
+    }
+
 
     private void OnApplicationQuit()
     {

@@ -7,11 +7,26 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
+public enum TelegraphPulse { Off, Pulsing, On }
+
+
 public class TelegraphLineBehaviour : MonoBehaviour
 {
     [SerializeField]
     private Image m_telegraphImage;
-    private bool m_telegraphPulsing = false;
+    private TelegraphPulse m_telegraphPulsing = TelegraphPulse.Off;
+    public TelegraphPulse Pulse
+    {
+        get
+        {
+            return m_telegraphPulsing;
+        }
+        set
+        {
+            UpdateTelegraphLayer(value != TelegraphPulse.Off);
+            m_telegraphPulsing = value;
+        }
+    }
     private static readonly Color m_telegraphPulseMin = Color.white;
     private static readonly Color m_telegraphPulseMax = Color.red;
     private float m_pulseUpElapsed = 0;
@@ -28,12 +43,12 @@ public class TelegraphLineBehaviour : MonoBehaviour
 
     private void Update()
     {
-        // Default case
-        if (!m_telegraphPulsing)
+        // Off case
+        if (m_telegraphPulsing == TelegraphPulse.Off)
             m_telegraphImage.color = m_telegraphPulseMin;
 
-        // Pulsing case overrides Locked case
-        if (m_telegraphPulsing)
+        // Pulsing case
+        else if (m_telegraphPulsing == TelegraphPulse.Pulsing)
         {
             float t;
             Color lerpTo;
@@ -60,14 +75,10 @@ public class TelegraphLineBehaviour : MonoBehaviour
                 else m_pulseDownElapsed = 0;
             }
         }
-    }
 
-
-
-    public void SetPulsing(bool pulsing)
-    {
-        UpdateTelegraphLayer(pulsing);
-        m_telegraphPulsing = pulsing;
+        // On case
+        else
+            m_telegraphImage.color = m_telegraphPulseMax;
     }
 
 

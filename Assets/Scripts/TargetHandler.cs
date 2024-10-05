@@ -32,7 +32,7 @@ public class TargetHandler : MonoBehaviour
     [SerializeField]
     private TMP_Text m_targetHintText;
 
-    private MessengerBehaviour m_targetPony;
+    public MessengerBehaviour TargetMessenger { get; set; } = null;
 
 
     private void Start()
@@ -45,21 +45,15 @@ public class TargetHandler : MonoBehaviour
     }
 
 
-    public void SetPony(MessengerBehaviour pony)
-    {
-        m_targetPony = pony;
-    }
-
-
     public void CompleteTarget()
     {
-        if (m_targetPony == null)
+        if (TargetMessenger == null)
         {
             Debug.LogError("Target pony was null!");
         }
 
-        m_targetPony.Explode();
-        m_targetPony = null;
+        TargetMessenger.Explode();
+        TargetMessenger = null;
         Target = "";
         GetComponent<CityMessageManager>().CurrentMorseTarget = null;
     }
