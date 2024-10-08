@@ -105,7 +105,6 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         if (Messenger.MessengerActive)
         {
-            m_targetHandler.Target = Manager.ActiveMessages[Index];
             m_messengerTimer.enabled = true;
 
             // Enable pulse, if this messenger is not set active and the user started hovering over it.
@@ -124,7 +123,6 @@ public class CityMessageBehaviour : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         if (Messenger.MessengerActive)
         {
-            m_targetHandler.Target = MorseCode.MorsePhraseToEnglishPhrase(Manager.CurrentMorseTarget ?? new());
             m_messengerTimer.enabled = false;
 
             // Disable pulse, if this messenger is not set active and the user stopped hovering over it.

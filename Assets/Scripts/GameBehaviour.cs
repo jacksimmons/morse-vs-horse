@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -80,7 +81,7 @@ public class GameBehaviour : MonoBehaviour
 
                 // If all messengers have come and gone, and you are still alive, then you have won.
                 // If endless mode is selected, obviously this is not the case.
-                if (!SaveData.Instance.endlessSelected && m_poniesGone == Levels.AllLevels[Levels.SelectedLevel].Spawns.Count)
+                if (!SaveData.Instance.endlessSelected && m_poniesGone == level.Spawns.Count)
                 {
                     HandleVictory();
                 }
@@ -158,20 +159,15 @@ public class GameBehaviour : MonoBehaviour
         ih.OnMessageSelected(null);
 
         TargetHandler th = GetComponent<TargetHandler>();
-        // If the target is displayed and is the word that was lost
-        if (th.Target == wordLost)
-        {
-            th.Target = "";
-            th.TargetMessenger = null;
-        }
-        // If the target is hidden and is the word that was lost
-        // I.e. if another target is hovered over
-        else if (
+
+        // If the target is the word that was lost
+        if (
             CityMessageBehaviour.Manager.CurrentMorseTarget != null
             && MorseCode.MorsePhraseToEnglishPhrase(CityMessageBehaviour.Manager.CurrentMorseTarget) == wordLost
         )
         {
-            CityMessageBehaviour.Manager.CurrentMorseTarget = new();
+            CityMessageBehaviour.Manager.CurrentMorseTarget = null;
+            th.TargetMessenger = null;
         }
 
         // Go to next life lost sprite.
@@ -180,13 +176,12 @@ public class GameBehaviour : MonoBehaviour
 
         // All lives lost sprites seen, and another life lost => death.
         else
-            m_gameOverPanel.SetActive(true);
+            HandleGameOver();
     }
 
 
     private void HandleVictory()
     {
-        m_victoryPanel.SetActive(true);
         int completionRank = 3 - m_livesLost;
 
         // Update highest level beaten, if it has increased.
@@ -198,7 +193,7 @@ public class GameBehaviour : MonoBehaviour
 
             if (SaveData.Instance.highestLevelBeaten >= 8)
             {
-                Achievement.GiveAchievement("BEAT_LV_IX");
+                Steam.GiveAchievement("BEAT_LV_IX");
             }
         }
 
@@ -208,6 +203,24 @@ public class GameBehaviour : MonoBehaviour
         if (SaveData.Instance.completionRanks[Levels.SelectedLevel] < completionRank && !SaveData.Instance.easyMode)
         {
             SaveData.Instance.completionRanks[Levels.SelectedLevel] = completionRank;
+        }
+
+        // Load victory scene
+        SceneManager.LoadScene("Victory");
+    }
+
+
+    private void HandleGameOver()
+    {
+        m_gameOverPanel.SetActive(true);
+
+        foreach (Transform city in m_cities.transform)
+        {
+            MessengerBehaviour msg = city.GetComponentInChildren<MessengerBehaviour>();
+            if (msg != null)
+            {
+                msg.Explode();
+            }
         }
     }
 }

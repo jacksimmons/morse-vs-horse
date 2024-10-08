@@ -68,26 +68,18 @@ public class InputHandler : MonoBehaviour
     private void HandleMorseInput()
     {
         if (Input.GetButtonDown("Signal"))
-        {
             m_morseSfx.Play();
-        }
 
         if (Input.GetButtonUp("Signal"))
-        {
             m_morseSfx.Pause();
-        }
 
         // If there is no target, ignore logic past the sfx.
         if (m_earlManager.CurrentMorseTarget == null)
-        {
             return;
-        }
 
         // If input is held...
         if (Input.GetButton("Signal"))
-        {
             m_currentSignalLength += Time.deltaTime;
-        }
         // If input is not held... (Handle key release & Breaks)
         else
         {

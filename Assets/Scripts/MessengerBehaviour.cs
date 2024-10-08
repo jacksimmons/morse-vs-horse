@@ -64,7 +64,17 @@ public class MessengerBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerE
                 totalDist += Vector2.Distance(start, end);
                 numEdges++;
             }
-            m_timerTotal = totalDist / m_speed;
+
+            // Boss word balancing - for all non-boss speeds, timing is based on distance.
+            // For boss speed, timing is fixed based on the speed. (Deterministic)
+            if (type == MessengerType.Boss)
+            {
+                m_timerTotal = 500 / m_speed;
+            }
+            else
+            {
+                m_timerTotal = totalDist / m_speed;
+            }
 
             // Convert SerializeFields into PathEdge
             m_path = new PathEdge[numEdges];
@@ -120,6 +130,7 @@ public class MessengerBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerE
             m_image.enabled = true;
         }
 
+
         private void SetEdge(int edgeIndex)
         {
             m_currentEdge = m_path[edgeIndex];
@@ -157,6 +168,13 @@ public class MessengerBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerE
 
     [SerializeField]
     private CityMessageBehaviour m_message;
+
+    /// <summary>
+    /// The messenger sprites corresponding to each messenger type.
+    /// 0 - MessengerType.Values[0]
+    /// </summary>
+    [SerializeField]
+    private Sprite[] m_messengerSprites;
 
 
     private void Start()

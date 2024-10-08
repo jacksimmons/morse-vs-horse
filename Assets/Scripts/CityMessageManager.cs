@@ -12,11 +12,25 @@ public class CityMessageManager : MonoBehaviour
 
     private int m_numActiveMessages = 0;
 
+    private MorsePhrase m_currentMorseTarget = null;
     /// <summary>
-    /// The target MorseWord. When the input equals the target, the message is
-    /// completed.
+    /// The target. When the input equals the target, the message is completed.
     /// </summary>
-    public MorsePhrase CurrentMorseTarget { get; set; } = null;
+    public MorsePhrase CurrentMorseTarget
+    {
+        get
+        {
+            return m_currentMorseTarget;
+        }
+        set
+        {
+            m_currentMorseTarget = value;
+            GetComponent<TargetHandler>().Target =
+            value == null
+                ? ""
+                : MorseCode.MorsePhraseToEnglishPhrase(value);
+        }
+    }
 
     /// <summary>
     /// WordDifficulty to list of messages of that WordDifficulty.

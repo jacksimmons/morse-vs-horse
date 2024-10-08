@@ -53,10 +53,12 @@ public class LevelSelectBtnBehaviour : LevelSelectBehaviour
         return true;
     }
 
+
     public void OnLevelBtnClicked(int level)
     {
         SaveData.Instance.levelSelected = level;
         SaveData.Instance.endlessSelected = false;
+        Saving.Save();
         SceneManager.LoadScene("Game");
     }
 }

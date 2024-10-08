@@ -4,8 +4,16 @@ using UnityEngine;
 
 public class TargetHandler : MonoBehaviour
 {
+    /// <summary>
+    /// Text displaying the target.
+    /// </summary>
     [SerializeField]
     private TMP_Text m_targetText;
+
+    /// <summary>
+    /// The target value. This is the target displayed in the UI, and its corresponding
+    /// hint.
+    /// </summary>
     public string Target
     {
         set
@@ -26,6 +34,7 @@ public class TargetHandler : MonoBehaviour
             return m_targetText.text;
         }
     }
+
 
     [SerializeField]
     private TMP_Text m_targetHintLabel;
