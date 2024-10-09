@@ -18,7 +18,7 @@ public class TargetHandler : MonoBehaviour
     {
         set
         {
-            if (SaveData.Instance.easyMode)
+            if (SaveData.Instance.difficulty == SaveData.MorseDifficulty.Easy)
             {
                 m_targetText.text = value;
                 m_targetHintText.text = $"{MorseCode.EnglishWordToMorseWord(value)}";
@@ -46,7 +46,7 @@ public class TargetHandler : MonoBehaviour
 
     private void Start()
     {
-        if (SaveData.Instance.easyMode)
+        if (SaveData.Instance.difficulty == SaveData.MorseDifficulty.Easy)
         {
             m_targetHintLabel.enabled = true;
             m_targetHintText.enabled = true;

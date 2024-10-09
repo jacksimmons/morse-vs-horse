@@ -51,6 +51,13 @@ public class Version : IComparable<Version>
 [Serializable]
 public class SaveData
 {
+    public enum MorseDifficulty
+    {
+        Easy,
+        Normal,
+        Hard
+    }
+
     private static SaveData m_inst;
     public static SaveData Instance
     {
@@ -109,9 +116,9 @@ public class SaveData
     
     private const int NUM_LEVELS = 9;
 
-
     public bool fullscreen = false;
-    public bool easyMode = false;
+
+    public MorseDifficulty difficulty = MorseDifficulty.Normal;
 
     // Get the first valid resolution
     public Resolution resolution = AspectRatio.GetSupportedResolutions()[0];

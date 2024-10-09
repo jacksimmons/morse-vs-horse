@@ -11,7 +11,7 @@ public class MainMenuHandler : MonoBehaviour
     [SerializeField]
     private Toggle m_fullscreenToggle;
     [SerializeField]
-    private Toggle m_easyModeToggle;
+    private TMP_Dropdown m_difficultyDropdown;
     [SerializeField]
     private GameObject m_resolutionLRBtn;
     [SerializeField]
@@ -26,7 +26,7 @@ public class MainMenuHandler : MonoBehaviour
     private void Start()
     {
         m_fullscreenToggle.onValueChanged.AddListener(OnFullscreenTogglePressed);
-        m_easyModeToggle.onValueChanged.AddListener(OnEasyModeTogglePressed);
+        m_difficultyDropdown.onValueChanged.AddListener(OnDifficultyDropdownValueChanged);
 
         m_musicVolume.onValueChanged.AddListener(OnMusicVolumeValueChanged);
         m_musicVolume.GetComponentInParent<SliderBehaviour>().SetSliderValue(SaveData.Instance.musicVolume);
@@ -36,7 +36,7 @@ public class MainMenuHandler : MonoBehaviour
         m_dashTiming.GetComponentInParent<SliderBehaviour>().SetSliderValue(SaveData.Instance.dashSigLongerThan);
 
         m_fullscreenToggle.isOn = SaveData.Instance.fullscreen;
-        m_easyModeToggle.isOn = SaveData.Instance.easyMode;
+        m_difficultyDropdown.value = (int)SaveData.Instance.difficulty;
 
         // Enforce 16:9 aspect ratio
         m_supportedResolutions = new(AspectRatio.GetSupportedResolutions());
@@ -67,9 +67,9 @@ public class MainMenuHandler : MonoBehaviour
     }
 
 
-    public void OnEasyModeTogglePressed(bool toggle)
+    public void OnDifficultyDropdownValueChanged(int value)
     {
-        SaveData.Instance.easyMode = toggle;
+        SaveData.Instance.difficulty = (SaveData.MorseDifficulty)value;
         Saving.Save();
     }
 

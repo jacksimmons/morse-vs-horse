@@ -201,13 +201,12 @@ public class GameBehaviour : MonoBehaviour
         // Update the completion rank (1-star, 2-star, 3-star) if improved upon.
         // Don't improve completion rank if easy mode is on. Beating on easy mode is
         // equivalent to a 0-star completion.
-        if (SaveData.Instance.completionRanks[Levels.SelectedLevel] < completionRank && !SaveData.Instance.easyMode)
+        if (SaveData.Instance.completionRanks[Levels.SelectedLevel] < completionRank && (SaveData.Instance.difficulty != SaveData.MorseDifficulty.Easy))
         {
             SaveData.Instance.completionRanks[Levels.SelectedLevel] = completionRank;
         }
 
         GlobalManager.Instance.LastCompletionRank = completionRank;
-
 
         // Load victory scene
         SceneManager.LoadScene("Victory");
