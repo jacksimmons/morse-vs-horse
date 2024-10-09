@@ -5,8 +5,9 @@ using UnityEngine;
 public class GlobalManager : MonoBehaviour
 {
     public readonly static AppId_t AppId = new(1999720);
-
     protected Callback<UserStatsReceived_t> m_UserStatsReceived;
+    public int LastCompletionRank { get; set; }
+
 
     public static GlobalManager Instance
     {

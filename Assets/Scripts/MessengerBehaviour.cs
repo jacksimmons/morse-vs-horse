@@ -176,6 +176,9 @@ public class MessengerBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerE
     [SerializeField]
     private Sprite[] m_messengerSprites;
 
+    [SerializeField]
+    private Image m_image;
+
 
     private void Start()
     {
@@ -221,6 +224,9 @@ public class MessengerBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerE
 
         m_messenger = new Messenger(type, this, journey);
         MessengerActive = true;
+
+        // Set the image sprite based on difficulty
+        m_image.sprite = m_messengerSprites[(int)type];
     }
 
 

@@ -16,7 +16,7 @@ public class ButcherBehaviour : MonoBehaviour
     private void Awake()
     {
         // Level selected will still be the level just beaten/lost to
-        int livesLeft = SaveData.Instance.completionRanks[SaveData.Instance.levelSelected];
+        int livesLeft = GlobalManager.Instance.LastCompletionRank;
 
         // If butchering the horses...
         if (livesLeft > 0)
@@ -24,8 +24,8 @@ public class ButcherBehaviour : MonoBehaviour
             // Hide all horses not to be executed (only execute n horses, where n is the completion rank)
             for (int i = livesLeft; i < 3; i++)
             {
-                m_objsToButcher[i].SetActive(false);
-                m_objsToButcher.RemoveAt(i);
+                m_objsToButcher[0].SetActive(false);
+                m_objsToButcher.RemoveAt(0);
             }
         }
         // Otherwise we are butchering the king, who is always butchered here
@@ -59,6 +59,12 @@ public class ButcherBehaviour : MonoBehaviour
     /// </summary>
     private void Butcher(GameObject go)
     {
+        // If we are butchering the king, get him to drop his staff.
+        if (go.TryGetComponent(out KingBehaviour kb))
+        {
+            kb.DropStaff();
+        }
+
         Destroy(go);
         GetComponent<ParticleSystem>().Play();
     }

@@ -155,19 +155,20 @@ public class GameBehaviour : MonoBehaviour
     {
         m_livesLost++;
 
-        InputHandler ih = GetComponent<InputHandler>();
-        ih.OnMessageSelected(null);
-
-        TargetHandler th = GetComponent<TargetHandler>();
-
-        // If the target is the word that was lost
+        // If the target is the word that was lost, reset input and target.
         if (
             CityMessageBehaviour.Manager.CurrentMorseTarget != null
             && MorseCode.MorsePhraseToEnglishPhrase(CityMessageBehaviour.Manager.CurrentMorseTarget) == wordLost
         )
         {
+            // Set target to null
             CityMessageBehaviour.Manager.CurrentMorseTarget = null;
+            TargetHandler th = GetComponent<TargetHandler>();
             th.TargetMessenger = null;
+
+            // Set input to null
+            InputHandler ih = GetComponent<InputHandler>();
+            ih.OnMessageSelected(null);
         }
 
         // Go to next life lost sprite.
@@ -176,7 +177,7 @@ public class GameBehaviour : MonoBehaviour
 
         // All lives lost sprites seen, and another life lost => death.
         else
-            HandleGameOver();
+            HandleDefeat();
     }
 
 
@@ -205,22 +206,17 @@ public class GameBehaviour : MonoBehaviour
             SaveData.Instance.completionRanks[Levels.SelectedLevel] = completionRank;
         }
 
+        GlobalManager.Instance.LastCompletionRank = completionRank;
+
+
         // Load victory scene
         SceneManager.LoadScene("Victory");
     }
 
 
-    private void HandleGameOver()
+    private void HandleDefeat()
     {
-        m_gameOverPanel.SetActive(true);
-
-        foreach (Transform city in m_cities.transform)
-        {
-            MessengerBehaviour msg = city.GetComponentInChildren<MessengerBehaviour>();
-            if (msg != null)
-            {
-                msg.Explode();
-            }
-        }
+        // Load defeat scene
+        SceneManager.LoadScene("Defeat");
     }
 }

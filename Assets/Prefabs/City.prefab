@@ -648,6 +648,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_message: {fileID: 2196400638819999094}
+  m_messengerSprites:
+  - {fileID: 21300000, guid: 6da380a89ae4dfa47ab4be1bd2b753db, type: 3}
+  - {fileID: 21300000, guid: 6ac38cf4b8589d846b65cac766c9f6f2, type: 3}
+  - {fileID: 21300000, guid: c054aea03ddfb1740a3ab12dba7157b9, type: 3}
+  - {fileID: 21300000, guid: 0ace67fe328408a45a6d0747a9408d60, type: 3}
+  m_image: {fileID: 3511469497199073701}
 --- !u!1 &8369085833318150974
 GameObject:
   m_ObjectHideFlags: 0
